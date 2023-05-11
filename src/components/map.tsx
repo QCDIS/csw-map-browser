@@ -7,7 +7,7 @@ import "ol/ol.css";
 
 export function Map() {
     const mapRef = useRef<HTMLDivElement>(null);
-    const [map, setMap] = useState<OlMap | null>(null);
+    const [_map, setMap] = useState<OlMap | null>(null);
 
     useEffect(() => {
         const map = new OlMap({

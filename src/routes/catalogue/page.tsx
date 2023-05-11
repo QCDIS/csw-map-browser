@@ -1,14 +1,12 @@
-import { useRouteLoaderData } from "react-router-dom";
-import { loader } from "./layout";
 import { Map } from "@/components/map";
 import { FilterPanel } from "./filter-panel";
 import { MetadataPanel } from "./metadata-panel";
 import { TablePanel } from "./table-panel";
 
 export function CataloguePage() {
-    const data = useRouteLoaderData("catalogue-layout") as Awaited<
-        ReturnType<typeof loader>
-    >;
+    // const _data = useRouteLoaderData("catalogue-layout") as Awaited<
+    //     ReturnType<typeof loader>
+    // >;
     return (
         <div
             className="grid h-full"

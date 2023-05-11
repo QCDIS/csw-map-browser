@@ -6,5 +6,5 @@ export function parseCswGetCapabilitiesResponse(capabilities: ElementCompact) {
         serviceIdentification: {
             title: capabilities.capabilities.serviceIdentification.title._text,
         },
-    } satisfies CswCapabilities;
+    } as any satisfies CswCapabilities;
 }
