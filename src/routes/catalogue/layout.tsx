@@ -6,17 +6,15 @@ import {
 } from "react-router-dom";
 import { Breadcrumb, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { CswClient } from "@/lib/csw/api";
-import RecordPage from "./record/page";
+import RecordPage, { useRecordPageData } from "./record/page";
 
 export function CatalogueLayout() {
     const data = useLoaderData() as Awaited<ReturnType<typeof loader>>;
-    const recordData = useRouteLoaderData("record-page") as Awaited<
-        ReturnType<typeof RecordPage.loader>
-    >;
-    console.log(recordData);
+    const recordData = useRecordPageData();
+
     return (
         <div className="h-screen flex flex-col">
-            <div className="supports-backdrop-blur:bg-background/60 sticky top-0 z-40 w-full border-b bg-background/95 shadow-sm backdrop-blur">
+            <div className="w-full border-b shadow-sm">
                 <div className="mr-[20%] ml-[20%] p-4">
                     <Breadcrumb>
                         <BreadcrumbPage
@@ -58,4 +56,10 @@ export async function loader({ params }: LoaderFunctionArgs) {
             capabilities,
         },
     };
+}
+
+export function useCatalogueLayoutData() {
+    return useRouteLoaderData("catalogue-layout") as Awaited<
+        ReturnType<typeof loader>
+    >;
 }

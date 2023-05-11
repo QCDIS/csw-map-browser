@@ -2,11 +2,31 @@ import { Map } from "@/components/map";
 import { FilterPanel } from "./filter-panel";
 import { MetadataPanel } from "./metadata-panel";
 import { TablePanel } from "./table-panel";
+import { useRef, useState } from "react";
+import MapEvent from "ol/MapEvent";
+import { useCatalogueLayoutData } from "./layout";
+import { CswClient } from "@/lib/csw/api";
 
 export function CataloguePage() {
-    // const _data = useRouteLoaderData("catalogue-layout") as Awaited<
-    //     ReturnType<typeof loader>
-    // >;
+    const data = useCatalogueLayoutData();
+
+    const [records, setRecords] = useState<any>([]);
+    const abortControllerRef = useRef<AbortController | null>(null);
+
+    async function onMapMoveEnd(e: MapEvent) {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        const abortController = new AbortController();
+        abortControllerRef.current = abortController;
+        const records = await CswClient.getRecords(data.csw.endpoint, {
+            signal: abortController.signal,
+        });
+        abortControllerRef.current = null;
+        setRecords(records);
+    }
+
     return (
         <div
             className="grid h-full"
@@ -19,7 +39,7 @@ export function CataloguePage() {
                 <FilterPanel />
             </div>
             <div>
-                <Map />
+                <Map onMoveEnd={onMapMoveEnd} />
             </div>
             <div className="p-4 row-span-2">
                 <MetadataPanel />

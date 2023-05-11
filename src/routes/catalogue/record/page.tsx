@@ -1,5 +1,5 @@
 import { CswClient } from "@/lib/csw/api";
-import { LoaderFunctionArgs } from "react-router-dom";
+import { LoaderFunctionArgs, useRouteLoaderData } from "react-router-dom";
 
 export default function RecordPage() {
     return <div>Record</div>;
@@ -15,4 +15,10 @@ async function loader({ params }: LoaderFunctionArgs) {
         recordId: params.recordId!,
         record,
     };
+}
+
+export function useRecordPageData() {
+    return useRouteLoaderData("record-page") as Awaited<
+        ReturnType<typeof loader>
+    >;
 }

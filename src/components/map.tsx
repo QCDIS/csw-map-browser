@@ -2,10 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { Map as OlMap, View } from "ol";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
+import MapEvent from "ol/MapEvent";
 
 import "ol/ol.css";
 
-export function Map() {
+type MapProps = {
+    onMoveEnd?: (e: MapEvent) => void;
+};
+
+export function Map(props: MapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const [_map, setMap] = useState<OlMap | null>(null);
 
@@ -25,6 +30,9 @@ export function Map() {
         });
 
         setMap(map);
+
+        props.onMoveEnd &&
+            map.addEventListener("moveend", props.onMoveEnd as any);
 
         return () => map.dispose();
     }, []);
