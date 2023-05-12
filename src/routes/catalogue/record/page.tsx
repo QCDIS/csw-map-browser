@@ -1,7 +1,7 @@
 import { CswClient } from "@/lib/csw/api";
 import { LoaderFunctionArgs, useRouteLoaderData } from "react-router-dom";
 
-export default function RecordPage() {
+export function RecordPage() {
     return <div>Record</div>;
 }
 RecordPage.loader = loader;

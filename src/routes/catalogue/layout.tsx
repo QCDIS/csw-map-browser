@@ -6,11 +6,33 @@ import {
 } from "react-router-dom";
 import { Breadcrumb, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { CswClient } from "@/lib/csw/api";
-import RecordPage, { useRecordPageData } from "./record/page";
+import { useRecordPageData } from "./record/page";
+import { useEffect } from "react";
 
 export function CatalogueLayout() {
     const data = useLoaderData() as Awaited<ReturnType<typeof loader>>;
     const recordData = useRecordPageData();
+
+    useEffect(() => {
+        const recentCatalogues = JSON.parse(
+            localStorage.getItem("recentCatalogues") || "[]"
+        ) as { endpoint: string; name: string }[];
+
+        const newRecentCatalogues = [
+            {
+                endpoint: data.csw.endpoint,
+                name:
+                    data.csw.capabilities.serviceIdentification.title ??
+                    data.csw.endpoint,
+            },
+            ...recentCatalogues.filter((c) => c.endpoint !== data.csw.endpoint),
+        ].slice(0, 5);
+
+        localStorage.setItem(
+            "recentCatalogues",
+            JSON.stringify(newRecentCatalogues)
+        );
+    }, [data.csw.capabilities.serviceIdentification.title, data.csw.endpoint]);
 
     return (
         <div className="h-screen flex flex-col">
@@ -45,7 +67,7 @@ export function CatalogueLayout() {
 }
 CatalogueLayout.loader = loader;
 
-export async function loader({ params }: LoaderFunctionArgs) {
+async function loader({ params }: LoaderFunctionArgs) {
     const endpoint = decodeURIComponent(params.endpoint!);
 
     const capabilities = await CswClient.getCapabilities(endpoint);

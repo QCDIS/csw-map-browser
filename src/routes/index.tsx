@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
 import {
     Card,
@@ -16,14 +16,23 @@ import { useNavigate } from "react-router-dom";
 const DEV_DEFAULT_ENDPOINT =
     "https://nationaalgeoregister.nl/geonetwork/srv/eng/csw";
 
-function Index() {
+export function Index() {
     const navigate = useNavigate();
     const [endpoint, setEndpoint] = useState(
         import.meta.env.DEV ? DEV_DEFAULT_ENDPOINT : ""
     );
     const [error, setError] = useState<string>();
+    const [recentCatalogues, setRecentCatalogues] = useState<
+        { endpoint: string; name: string }[]
+    >([]);
 
-    function goToCatalogue() {
+    useEffect(() => {
+        setRecentCatalogues(
+            JSON.parse(localStorage.getItem("recentCatalogues") || "[]")
+        );
+    }, []);
+
+    function goToCatalogue(endpoint: string) {
         let url: URL | undefined = undefined;
         try {
             url = new URL(endpoint);
@@ -45,7 +54,26 @@ function Index() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form>
+                    {recentCatalogues.length > 0 && (
+                        <div className="flex flex-col gap-1.5 mb-6">
+                            <Label>Recent catalogues</Label>
+                            {recentCatalogues.map((c) => (
+                                <button
+                                    className="text-sm text-left p-0 text-muted-foreground"
+                                    key={c.endpoint}
+                                    onClick={() => goToCatalogue(c.endpoint)}
+                                >
+                                    {c.name}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            goToCatalogue(endpoint);
+                        }}
+                    >
                         <div className="flex flex-col gap-1.5">
                             <Label htmlFor="endpoint">CSW endpoint</Label>
                             <Input
@@ -59,17 +87,13 @@ function Index() {
                                     {error}
                                 </p>
                             )}
+                            <Button className="w-full" type="submit">
+                                View Catalogue
+                            </Button>
                         </div>
                     </form>
                 </CardContent>
-                <CardFooter className="flex justify-end">
-                    <Button className="w-full" onClick={goToCatalogue}>
-                        View Catalogue
-                    </Button>
-                </CardFooter>
             </Card>
         </div>
     );
 }
-
-export default Index;

@@ -1,8 +1,8 @@
 import { CatalogueLayout } from "./routes/catalogue/layout.tsx";
 import { CataloguePage } from "./routes/catalogue/page.tsx";
-import RecordPage from "./routes/catalogue/record/page.tsx";
+import { RecordPage } from "./routes/catalogue/record/page.tsx";
 import { ErrorPage } from "./routes/error.tsx";
-import Index from "./routes/index.tsx";
+import { Index } from "./routes/index.tsx";
 import { createBrowserRouter } from "react-router-dom";
 
 export const router = createBrowserRouter([

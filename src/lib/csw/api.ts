@@ -1,24 +1,23 @@
-import { xml2js, ElementCompact } from "xml-js";
-import { parseCswGetCapabilitiesResponse } from "./parser";
+import { CswParser } from "./parsing/parser";
 
 export class CswClient {
-    static async getCapabilities(endpoint: string) {
+    static async getCapabilities(
+        endpoint: string,
+        options: {
+            signal?: AbortSignal;
+        } = {}
+    ) {
         const url = new URL(endpoint);
         url.searchParams.set("service", "CSW");
         url.searchParams.set("request", "GetCapabilities");
 
-        const res = await fetch(url);
+        const res = await fetch(url, {
+            signal: options.signal,
+        });
 
         const text = await res.text();
 
-        const compactObj = xml2js(text, {
-            compact: true,
-            trim: true,
-        }) as ElementCompact;
-
-        const obj = removeNamespaces(compactObj) as ElementCompact;
-
-        return parseCswGetCapabilitiesResponse(obj);
+        return CswParser.parseGetCapabilities(text);
     }
 
     static async getRecords(
@@ -36,7 +35,12 @@ export class CswClient {
         url.searchParams.set("maxRecords", "10");
         url.searchParams.set("elementSetName", "full");
         url.searchParams.set("constraintLanguage", "FILTER");
+        url.searchParams.set(
+            "outputSchema",
+            "http://www.isotc211.org/2005/gmd"
+        );
         url.searchParams.set("constraint_language_version", "1.1.0");
+
         // url.searchParams.set(
         //     "constraint",
         //     `<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
@@ -52,13 +56,7 @@ export class CswClient {
         });
         const text = await res.text();
 
-        const compactObj = xml2js(text, {
-            compact: true,
-            trim: true,
-        }) as ElementCompact;
-        const obj = removeNamespaces(compactObj) as ElementCompact;
-
-        return obj;
+        return CswParser.parseGetRecords(text);
     }
 
     static async getRecordById(endpoint: string, id: string) {
@@ -67,42 +65,15 @@ export class CswClient {
         url.searchParams.set("request", "GetRecordById");
         url.searchParams.set("version", "2.0.2");
         url.searchParams.set("elementSetName", "full");
+        url.searchParams.set(
+            "outputSchema",
+            "http://www.isotc211.org/2005/gmd"
+        );
         url.searchParams.set("id", id);
 
         const res = await fetch(url);
         const text = await res.text();
 
-        const compactObj = xml2js(text, {
-            compact: true,
-            trim: true,
-        }) as ElementCompact;
-        const obj = removeNamespaces(compactObj) as ElementCompact;
-
-        return obj;
+        return CswParser.parseGetRecordById(text);
     }
-}
-
-function removeNamespaces(obj: Record<string, any>) {
-    return Object.entries(obj).reduce((acc, [key, value]) => {
-        const newKey = stripPrefix(key);
-        if (acc[newKey]) console.warn(`Duplicate key: ${newKey}`);
-
-        if (Array.isArray(value)) {
-            acc[newKey] = value.map((v) => removeNamespaces(v));
-            return acc;
-        } else if (typeof value === "object") {
-            acc[newKey] = removeNamespaces(value);
-        } else {
-            acc[newKey] = value;
-        }
-        return acc;
-    }, {} as Record<string, any>);
-}
-
-// matches all xml prefixes, except for `xmlns:`
-const prefixMatch = new RegExp(/(?!xmlns)^.*:/);
-function stripPrefix(name: string) {
-    const stripped = name.replace(prefixMatch, "");
-
-    return stripped.charAt(0).toLowerCase() + stripped.slice(1);
 }

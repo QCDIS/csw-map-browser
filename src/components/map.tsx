@@ -12,7 +12,7 @@ type MapProps = {
 
 export function Map(props: MapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
-    const [_map, setMap] = useState<OlMap | null>(null);
+    const [map, setMap] = useState<OlMap | null>(null);
 
     useEffect(() => {
         const map = new OlMap({
@@ -31,11 +31,16 @@ export function Map(props: MapProps) {
 
         setMap(map);
 
-        props.onMoveEnd &&
-            map.addEventListener("moveend", props.onMoveEnd as any);
-
         return () => map.dispose();
     }, []);
+
+    useEffect(() => {
+        if (!map) return;
+        if (!props.onMoveEnd) return;
+        map.addEventListener("moveend", props.onMoveEnd as any);
+
+        return () => map.removeEventListener("moveend", props.onMoveEnd as any);
+    }, [map, props.onMoveEnd]);
 
     return <div ref={mapRef} className="h-full w-full"></div>;
 }
