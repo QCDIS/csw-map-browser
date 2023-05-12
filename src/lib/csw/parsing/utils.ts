@@ -17,23 +17,25 @@ export class ElementWrapper {
     }
 
     text() {
-        return this.element.textContent ?? undefined;
+        return this.element.textContent?.trim() ?? undefined;
     }
 
     date() {
-        if (!this.element.textContent) {
+        const text = this.text();
+        if (!text) {
             return undefined;
         }
 
-        return new Date(this.element.textContent);
+        return new Date(text);
     }
 
     number() {
-        if (!this.element.textContent) {
+        const text = this.text();
+        if (!text) {
             return undefined;
         }
 
-        return Number(this.element.textContent);
+        return Number(text);
     }
 }
 

@@ -15,6 +15,8 @@ export function parseMdMetadata(el: ElementWrapper) {
     };
 }
 
+export type MetadataRecord = ReturnType<typeof parseMdMetadata>;
+
 export function parseReferenceSystemInfo(el: ElementWrapper) {
     return {
         code: el.getOne("code")?.text() ?? "",
@@ -32,7 +34,7 @@ export function parseIdentificationInfo(el: ElementWrapper) {
 
 export function parseCitation(el: ElementWrapper) {
     return {
-        title: el.getOne("title")?.text() ?? "",
+        title: el.getOne("title")?.getOne("CharacterString")?.text() ?? "",
         date: el.getOne("date")?.date(),
     };
 }
@@ -51,10 +53,10 @@ export function parseExtent(el?: ElementWrapper) {
 
     return {
         type: "BoundingBox",
-        westboundLongitude: el.getOne("westBoundLongitude")!.number(),
-        eastboundLongitude: el.getOne("eastBoundLongitude")!.text(),
-        southboundLatitude: el.getOne("southBoundLatitude")!.text(),
-        northboundLatitude: el.getOne("northBoundLatitude")!.text(),
+        westBoundLongitude: el.getOne("westBoundLongitude")!.number()!,
+        eastBoundLongitude: el.getOne("eastBoundLongitude")!.number()!,
+        southBoundLatitude: el.getOne("southBoundLatitude")!.number()!,
+        northBoundLatitude: el.getOne("northBoundLatitude")!.number()!,
     };
 }
 

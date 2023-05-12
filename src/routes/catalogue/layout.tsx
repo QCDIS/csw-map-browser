@@ -12,6 +12,7 @@ import { useEffect } from "react";
 export function CatalogueLayout() {
     const data = useLoaderData() as Awaited<ReturnType<typeof loader>>;
     const recordData = useRecordPageData();
+    console.log(recordData);
 
     useEffect(() => {
         const recentCatalogues = JSON.parse(
@@ -55,7 +56,10 @@ export function CatalogueLayout() {
                                     recordData.recordId
                                 )}`}
                             >
-                                {recordData.recordId}
+                                {
+                                    recordData.record.identificationInfo
+                                        .citation.title
+                                }
                             </BreadcrumbPage>
                         )}
                     </Breadcrumb>

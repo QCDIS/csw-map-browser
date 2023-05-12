@@ -32,7 +32,7 @@ export class CswClient {
         url.searchParams.set("version", "2.0.2");
         url.searchParams.set("typeNames", "csw:Record");
         url.searchParams.set("resultType", "results");
-        url.searchParams.set("maxRecords", "10");
+        url.searchParams.set("maxRecords", "100");
         url.searchParams.set("elementSetName", "full");
         url.searchParams.set("constraintLanguage", "FILTER");
         url.searchParams.set(
