@@ -18,7 +18,7 @@ export function CataloguePage() {
         <div
             className="grid h-full"
             style={{
-                gridTemplateRows: "auto 30%",
+                gridTemplateRows: "auto 33.333%",
                 gridTemplateColumns: "20% auto 20%",
             }}
         >
@@ -31,7 +31,7 @@ export function CataloguePage() {
             <div className="p-4 row-span-2">
                 <MetadataPanel />
             </div>
-            <div className="p-4 overflow-auto">
+            <div className="py-4 h-full">
                 <TablePanel />
             </div>
         </div>

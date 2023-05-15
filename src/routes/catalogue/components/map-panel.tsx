@@ -25,34 +25,62 @@ import {
 import { useCatalogueLayoutData } from "../layout";
 import { Layer } from "@/components/geomap/layer";
 import { MetadataRecord } from "@/lib/csw/parsing/md-metadata";
+import { Circle as CircleStyle } from "ol/style";
+
+const DEFAULT_STROKE = new Stroke({
+    color: "#0f172a",
+    width: 2,
+});
+
+const DEFAULT_FILL = new Fill({
+    color: "rgba(255,255,255,0.2)",
+});
 
 const DEFAULT_STYLE = new Style({
-    fill: new Fill({
-        color: "rgba(255,255,255,0.2)",
+    fill: DEFAULT_FILL,
+    stroke: DEFAULT_STROKE,
+    image: new CircleStyle({
+        radius: 5,
+        fill: DEFAULT_FILL,
+        stroke: DEFAULT_STROKE,
     }),
-    stroke: new Stroke({
-        color: "#0f172a",
-        width: 2,
-    }),
+});
+
+const HOVERED_STROKE = new Stroke({
+    color: "#0f172a",
+    width: 4,
+});
+
+const HOVERED_FILL = new Fill({
+    color: "rgba(0,0,0,0.05)",
 });
 
 const HOVERED_STYLE = new Style({
-    fill: new Fill({
-        color: "rgba(0,0,0,0.05)",
-    }),
-    stroke: new Stroke({
-        color: "#0f172a",
-        width: 4,
+    fill: HOVERED_FILL,
+    stroke: HOVERED_STROKE,
+    image: new CircleStyle({
+        radius: 5,
+        fill: HOVERED_FILL,
+        stroke: HOVERED_STROKE,
     }),
 });
 
+const SELECTED_STROKE = new Stroke({
+    color: "#1d4ed8",
+    width: 4,
+});
+
+const SELECTED_FILL = new Fill({
+    color: "rgba(255,255,255,0.2)",
+});
+
 const SELECTED_STYLE = new Style({
-    fill: new Fill({
-        color: "rgba(255,255,255,0.2)",
-    }),
-    stroke: new Stroke({
-        color: "#1d4ed8",
-        width: 4,
+    fill: SELECTED_FILL,
+    stroke: SELECTED_STROKE,
+    image: new CircleStyle({
+        radius: 5,
+        fill: SELECTED_FILL,
+        stroke: SELECTED_STROKE,
     }),
 });
 
@@ -185,7 +213,7 @@ export function MapPanel() {
             const features = e.map.getFeaturesAtPixel(e.pixel!);
 
             setHoveredRecords(
-                features.map((f) => f.getProperties().id as string)
+                features.map((f) => f.getProperties().id as string).slice(0, 1)
             );
         },
         [setHoveredRecords]
@@ -250,14 +278,15 @@ export function MapPanel() {
     return (
         <div
             className={cn(
-                "h-full w-full relative",
+                "h-full w-full relative overflow-hidden rounded-b-md",
                 hoveredRecords.length > 0 && "cursor-pointer"
             )}
-            onClick={() =>
-                hoveredRecords.length && selectRecord(hoveredRecords[0])
-            }
         >
-            <GeoMap onMoveEnd={onMapMoveEnd} onPointerMove={onMapPointerMove}>
+            <GeoMap
+                onMoveEnd={onMapMoveEnd}
+                onPointerMove={onMapPointerMove}
+                onClick={() => selectRecord(hoveredRecords.at(0))}
+            >
                 <Layer layer={boundaryBoxLayer} />
                 <div className="absolute right-2 top-2 z-10">
                     {recordStatus.type === "loading" ? (

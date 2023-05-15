@@ -15,7 +15,7 @@ type CatalogueStore = {
         setRecords: (records: Map<string, MetadataRecord>) => void;
         setRecordStatus: (status: Status) => void;
         setHoveredRecords: (hoveredRecords: string[]) => void;
-        selectRecord: (id: string) => void;
+        selectRecord: (id: string | undefined) => void;
     };
 };
 

@@ -11,12 +11,15 @@ import {
     Table,
     TableBody,
     TableCell,
+    TableFooter,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { extend } from "ol/extent";
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData, TValue>
+    extends React.HTMLAttributes<HTMLTableElement> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
     onRowClick?: (row: TData) => void;
@@ -32,6 +35,7 @@ export function DataTable<TData, TValue>({
     onRowMouseOver,
     onRowMouseLeave,
     rowClassName,
+    ...props
 }: DataTableProps<TData, TValue>) {
     const table = useReactTable({
         data,
@@ -40,14 +44,21 @@ export function DataTable<TData, TValue>({
     });
 
     return (
-        <div className="rounded-md border">
-            <Table>
+        <div className="rounded-md border max-h-full overflow-auto">
+            <Table {...props}>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>
                             {headerGroup.headers.map((header) => {
                                 return (
-                                    <TableHead key={header.id}>
+                                    <TableHead
+                                        key={header.id}
+                                        className="sticky top-0 z-10"
+                                        style={{
+                                            boxShadow:
+                                                "inset 0 -1px 0 hsl(var(--border))",
+                                        }}
+                                    >
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(
@@ -105,6 +116,19 @@ export function DataTable<TData, TValue>({
                         </TableRow>
                     )}
                 </TableBody>
+                <TableFooter>
+                    <TableRow className="border-b-0">
+                        <TableCell
+                            colSpan={columns.length}
+                            className="sticky bottom-0 bg-white"
+                            style={{
+                                boxShadow: "inset 0 1px 0 hsl(var(--border))",
+                            }}
+                        >
+                            jkfldajkfdlsa;
+                        </TableCell>
+                    </TableRow>
+                </TableFooter>
             </Table>
         </div>
     );

@@ -38,7 +38,7 @@ export function CatalogueLayout() {
     return (
         <div className="h-screen flex flex-col">
             <div className="w-full border-b shadow-sm">
-                <div className="mr-[20%] ml-[20%] p-4">
+                <div className="mr-[20%] ml-[20%] p-3">
                     <Breadcrumb>
                         <BreadcrumbPage
                             href={`/catalogue/${encodeURIComponent(

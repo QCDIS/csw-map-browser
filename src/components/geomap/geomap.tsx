@@ -10,6 +10,7 @@ import "ol/ol.css";
 type MapProps = {
     onMoveEnd?: (e: MapEvent) => void;
     onPointerMove?: (e: MapBrowserEvent<any>) => void;
+    onClick?: (e: MapBrowserEvent<any>) => void;
     children?: React.ReactNode;
 };
 
@@ -53,6 +54,14 @@ export function GeoMap(props: MapProps) {
         return () =>
             map.removeEventListener("pointermove", props.onPointerMove as any);
     }, [map, props.onPointerMove]);
+
+    useEffect(() => {
+        if (!map) return;
+        if (!props.onClick) return;
+        map.addEventListener("click", props.onClick as any);
+
+        return () => map.removeEventListener("click", props.onClick as any);
+    }, [map, props.onClick]);
 
     return (
         <MapProvider value={{ map }}>

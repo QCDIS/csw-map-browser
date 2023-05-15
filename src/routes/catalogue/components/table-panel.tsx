@@ -33,7 +33,7 @@ export function TablePanel() {
                 onRowMouseOver={(row) =>
                     setHoveredRecords([row.fileIdentifier])
                 }
-                onRowMouseLeave={(row) => setHoveredRecords([])}
+                onRowMouseLeave={() => setHoveredRecords([])}
                 rowClassName={(row) =>
                     cn({
                         "font-bold !bg-muted":
