@@ -16,7 +16,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { extend } from "ol/extent";
 
 interface DataTableProps<TData, TValue>
     extends React.HTMLAttributes<HTMLTableElement> {
