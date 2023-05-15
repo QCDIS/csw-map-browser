@@ -18,6 +18,9 @@ export function parseMdMetadata(el: ElementWrapper) {
 export type MetadataRecord = ReturnType<typeof parseMdMetadata>;
 
 export function parseReferenceSystemInfo(el: ElementWrapper) {
+    if (!el) {
+        return undefined;
+    }
     return {
         code: el.getOne("code")?.text() ?? "",
         codeSpace: el.getOne("codeSpace")?.text() ?? "",
@@ -28,7 +31,11 @@ export function parseIdentificationInfo(el: ElementWrapper) {
     return {
         citation: parseCitation(el.getOne("citation")!),
         abstract: el.getOne("abstract")?.text() ?? "",
-        extent: parseExtent(el.getOne("extent")),
+        extent: el
+            .get("extent")
+            .map(parseExtent)
+            .filter((e) => e)
+            .at(0),
     };
 }
 
@@ -44,8 +51,9 @@ export function parseExtent(el?: ElementWrapper) {
         return undefined;
     }
     // TODO: parse other types of extent
-    el = el.getOne("EX_GeographicBoundingBox")!;
-    if (!el) {
+    const bbox = el.getOne("EX_GeographicBoundingBox")!;
+    if (!bbox) {
+        return undefined;
         throw new Error(
             "EX_GeographicBoundingBox not found, extent type not supported http://www.datypic.com/sc/niem20/e-gmd_EX_Extent.html"
         );
@@ -53,10 +61,10 @@ export function parseExtent(el?: ElementWrapper) {
 
     return {
         type: "BoundingBox",
-        westBoundLongitude: el.getOne("westBoundLongitude")!.number()!,
-        eastBoundLongitude: el.getOne("eastBoundLongitude")!.number()!,
-        southBoundLatitude: el.getOne("southBoundLatitude")!.number()!,
-        northBoundLatitude: el.getOne("northBoundLatitude")!.number()!,
+        westBoundLongitude: bbox.getOne("westBoundLongitude")!.number()!,
+        eastBoundLongitude: bbox.getOne("eastBoundLongitude")!.number()!,
+        southBoundLatitude: bbox.getOne("southBoundLatitude")!.number()!,
+        northBoundLatitude: bbox.getOne("northBoundLatitude")!.number()!,
     };
 }
 

@@ -1,5 +1,5 @@
 export class ElementWrapper {
-    constructor(private element: Element) {}
+    constructor(public element: Element) {}
 
     get(name: string) {
         return [...this.element.getElementsByTagNameNS("*", name)].map(

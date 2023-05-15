@@ -10,7 +10,7 @@ export function coordsTo3857([lon, lat]: readonly [number, number]) {
     const x = (lon * 20037508.34) / 180;
     let y = Math.log(Math.tan(((90 + lat) * Math.PI) / 360)) / (Math.PI / 180);
     y = (y * 20037508.34) / 180;
-    return [x, y];
+    return [x, y] as const;
 }
 
 export function coordsFrom3857([x, y]: readonly [number, number]) {
@@ -19,5 +19,5 @@ export function coordsFrom3857([x, y]: readonly [number, number]) {
     lat =
         (180 / Math.PI) *
         (2 * Math.atan(Math.exp((lat * Math.PI) / 180)) - Math.PI / 2);
-    return [lon, lat];
+    return [lon, lat] as const;
 }
