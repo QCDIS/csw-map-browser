@@ -1,5 +1,4 @@
 import { GeoMap } from "@/components/geomap/geomap";
-import { CswClient } from "@/lib/csw/api";
 import { cn, coordsFrom3857, coordsTo3857 } from "@/lib/utils";
 import {
     Tooltip,
@@ -16,16 +15,14 @@ import Stroke from "ol/style/Stroke";
 import Style from "ol/style/Style";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
-    useCatalogueRecords,
-    useCatalogueRecordStatus,
     useCatalogueActions,
     useCatalogueHoveredRecords,
     useCatalogueSelectedRecordId,
 } from "../store";
-import { useCatalogueLayoutData } from "../layout";
 import { Layer } from "@/components/geomap/layer";
 import { MetadataRecord } from "@/lib/csw/parsing/md-metadata";
 import { Circle as CircleStyle } from "ol/style";
+import { useRecords, useRecordsQuery } from "../query";
 
 const DEFAULT_STROKE = new Stroke({
     color: "#0f172a",
@@ -156,13 +153,12 @@ function getGeoJsonFromRecords(records: MetadataRecord[]) {
 }
 
 export function MapPanel() {
-    const data = useCatalogueLayoutData();
+    const { status, error } = useRecordsQuery();
+    const records = useRecords();
 
-    const records = useCatalogueRecords();
-    const recordStatus = useCatalogueRecordStatus();
     const hoveredRecords = useCatalogueHoveredRecords();
     const selectedRecordId = useCatalogueSelectedRecordId();
-    const { setRecords, setRecordStatus, setHoveredRecords, selectRecord } =
+    const { setHoveredRecords, selectRecord, setMapBbox } =
         useCatalogueActions();
 
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -176,36 +172,9 @@ export function MapPanel() {
             const minCoords = coordsFrom3857([bbox[0], bbox[1]]);
             const maxCoords = coordsFrom3857([bbox[2], bbox[3]]);
 
-            const abortController = new AbortController();
-            abortControllerRef.current = abortController;
-
-            setRecordStatus({ type: "loading" });
-
-            try {
-                const newRecords = await CswClient.getRecords(
-                    data.csw.endpoint,
-                    {
-                        signal: abortController.signal,
-                        boundingBox: [minCoords, maxCoords],
-                    }
-                );
-                abortControllerRef.current = null;
-                setRecords(
-                    new Map(
-                        newRecords.searchResults.map(
-                            (r) => [r.fileIdentifier, r] as const
-                        )
-                    )
-                );
-                setRecordStatus({ type: "idle" });
-            } catch (error: any) {
-                if (error.name === "AbortError") return;
-
-                setRecordStatus({ type: "error", error });
-                throw error;
-            }
+            setMapBbox([minCoords, maxCoords]);
         },
-        [data.csw.endpoint, setRecords, setRecordStatus]
+        [setMapBbox]
     );
 
     const onMapPointerMove = useCallback(
@@ -289,16 +258,16 @@ export function MapPanel() {
             >
                 <Layer layer={boundaryBoxLayer} />
                 <div className="absolute right-2 top-2 z-10">
-                    {recordStatus.type === "loading" ? (
+                    {status === "loading" ? (
                         <Loader2Icon className="h-7 w-7 animate-spin text-primary" />
-                    ) : recordStatus.type === "error" ? (
+                    ) : status === "error" ? (
                         <Tooltip>
                             <TooltipTrigger>
                                 <AlertTriangle className="h-7 w-7 text-destructive" />
                             </TooltipTrigger>
                             <TooltipContent>
                                 <span className="text-destructive">
-                                    {recordStatus.error.message}
+                                    {(error as Error).message}
                                 </span>
                             </TooltipContent>
                         </Tooltip>

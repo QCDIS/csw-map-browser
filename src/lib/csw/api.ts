@@ -28,6 +28,8 @@ export class CswClient {
                 readonly [number, number],
                 readonly [number, number]
             ];
+            startPosition?: number;
+            maxRecords?: number;
         } = {}
     ) {
         const url = new URL(endpoint);
@@ -36,7 +38,17 @@ export class CswClient {
         url.searchParams.set("version", "2.0.2");
         url.searchParams.set("typeNames", "csw:Record");
         url.searchParams.set("resultType", "results");
-        url.searchParams.set("maxRecords", "10");
+
+        if (options.maxRecords !== undefined) {
+            url.searchParams.set("maxRecords", options.maxRecords.toString());
+        }
+        if (options.startPosition !== undefined) {
+            url.searchParams.set(
+                "startPosition",
+                options.startPosition.toString()
+            );
+        }
+
         url.searchParams.set("elementSetName", "full");
         url.searchParams.set(
             "outputSchema",

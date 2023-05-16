@@ -2,8 +2,10 @@
 
 import {
     ColumnDef,
+    PaginationState,
     flexRender,
     getCoreRowModel,
+    getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 
@@ -25,6 +27,9 @@ interface DataTableProps<TData, TValue>
     onRowMouseOver?: (row: TData) => void;
     onRowMouseLeave?: (row: TData) => void;
     rowClassName?: (row: TData) => string;
+    pagination: PaginationState;
+    setPagination: any;
+    pageCount?: number;
 }
 
 export function DataTable<TData, TValue>({
@@ -34,12 +39,22 @@ export function DataTable<TData, TValue>({
     onRowMouseOver,
     onRowMouseLeave,
     rowClassName,
+    pagination,
+    setPagination,
+    pageCount,
     ...props
 }: DataTableProps<TData, TValue>) {
     const table = useReactTable({
         data,
         columns,
+        state: {
+            pagination,
+        },
+        pageCount: pageCount,
         getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        onPaginationChange: setPagination,
+        manualPagination: true,
     });
 
     return (
@@ -119,12 +134,23 @@ export function DataTable<TData, TValue>({
                     <TableRow className="border-b-0">
                         <TableCell
                             colSpan={columns.length}
-                            className="sticky bottom-0 bg-white"
+                            className="sticky bottom-0 bg-white font-bold"
                             style={{
                                 boxShadow: "inset 0 1px 0 hsl(var(--border))",
                             }}
                         >
-                            jkfldajkfdlsa;
+                            Page {table.getState().pagination.pageIndex + 1} of{" "}
+                            {table.getPageCount()}
+                            <button
+                                onClick={() =>
+                                    table.setPageIndex(
+                                        table.getState().pagination.pageIndex +
+                                            1
+                                    )
+                                }
+                            >
+                                +
+                            </button>
                         </TableCell>
                     </TableRow>
                 </TableFooter>

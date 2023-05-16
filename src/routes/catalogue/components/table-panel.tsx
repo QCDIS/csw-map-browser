@@ -3,11 +3,12 @@ import { ColumnDef } from "@tanstack/react-table";
 import {
     useCatalogueActions,
     useCatalogueHoveredRecords,
-    useCatalogueRecords,
+    useCataloguePagination,
     useCatalogueSelectedRecordId,
 } from "../store";
 import { DataTable } from "@/components/ui/datatable";
 import { cn } from "@/lib/utils";
+import { useRecords } from "../query";
 
 const columns: ColumnDef<MetadataRecord>[] = [
     {
@@ -17,10 +18,12 @@ const columns: ColumnDef<MetadataRecord>[] = [
 ];
 
 export function TablePanel() {
-    const records = useCatalogueRecords();
+    const records = useRecords();
     const selectedRecordId = useCatalogueSelectedRecordId();
     const hoveredRecords = useCatalogueHoveredRecords();
-    const { selectRecord, setHoveredRecords } = useCatalogueActions();
+    const pagination = useCataloguePagination();
+    const { selectRecord, setHoveredRecords, setPagination } =
+        useCatalogueActions();
 
     const data = [...records.values()];
 
@@ -29,6 +32,9 @@ export function TablePanel() {
             <DataTable
                 columns={columns}
                 data={data}
+                pagination={pagination}
+                pageCount={10}
+                setPagination={setPagination}
                 onRowClick={(row) => selectRecord(row.fileIdentifier)}
                 onRowMouseOver={(row) =>
                     setHoveredRecords([row.fileIdentifier])

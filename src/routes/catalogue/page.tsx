@@ -1,19 +1,9 @@
-import { useEffect } from "react";
 import { FilterPanel } from "./components/filter-panel";
 import { MapPanel } from "./components/map-panel";
 import { MetadataPanel } from "./components/metadata-panel";
 import { TablePanel } from "./components/table-panel";
-import { useCatalogueActions } from "./store";
-import { useCatalogueLayoutData } from "./layout";
 
 export function CataloguePage() {
-    const data = useCatalogueLayoutData();
-    const { setRecords } = useCatalogueActions();
-
-    useEffect(() => {
-        setRecords(new Map());
-    }, [data.csw.endpoint, setRecords]);
-
     return (
         <div
             className="grid h-full"

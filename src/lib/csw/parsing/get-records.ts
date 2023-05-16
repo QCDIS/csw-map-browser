@@ -13,14 +13,21 @@ export function parseGetRecords(el: ElementWrapper) {
 
         throw new Error("No SearchResults element found");
     }
+    const numberOfRecordsMatched = searchResults.attribute(
+        "numberOfRecordsMatched"
+    );
+
+    const numberOfRecordsReturned = searchResults.attribute(
+        "numberOfRecordsReturned"
+    );
 
     return {
         searchResults: searchResults.get("MD_Metadata").map(parseMdMetadata),
-        numberOfRecordsMatched: searchResults.attribute(
-            "numberOfRecordsMatched"
-        ),
-        numberOfRecordsReturned: searchResults.attribute(
-            "numberOfRecordsReturned"
-        ),
+        numberOfRecordsMatched: numberOfRecordsMatched
+            ? Number(numberOfRecordsMatched)
+            : undefined,
+        numberOfRecordsReturned: numberOfRecordsReturned
+            ? Number(numberOfRecordsReturned)
+            : undefined,
     };
 }
