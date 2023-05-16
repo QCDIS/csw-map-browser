@@ -36,6 +36,7 @@ export function useRecordsQuery() {
             };
         },
         retry: false,
+        keepPreviousData: true,
     });
 }
 

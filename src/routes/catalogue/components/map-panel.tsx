@@ -176,10 +176,8 @@ export function MapPanel() {
 
             setMapBbox([minCoords, maxCoords]);
             setPagination({ ...pagination, pageIndex: 0 });
-            selectRecord(undefined);
-            setHoveredRecords([]);
         },
-        [pagination, selectRecord, setHoveredRecords, setMapBbox, setPagination]
+        [pagination, setMapBbox, setPagination]
     );
 
     const onMapPointerMove = useCallback(
