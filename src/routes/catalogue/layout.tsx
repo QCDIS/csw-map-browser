@@ -12,7 +12,6 @@ import { useEffect } from "react";
 export function CatalogueLayout() {
     const data = useLoaderData() as Awaited<ReturnType<typeof loader>>;
     const recordData = useRecordPageData();
-    console.log(recordData);
 
     useEffect(() => {
         const recentCatalogues = JSON.parse(

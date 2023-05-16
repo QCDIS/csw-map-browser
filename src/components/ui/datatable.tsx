@@ -18,6 +18,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue>
     extends React.HTMLAttributes<HTMLTableElement> {
@@ -28,8 +29,9 @@ interface DataTableProps<TData, TValue>
     onRowMouseLeave?: (row: TData) => void;
     rowClassName?: (row: TData) => string;
     pagination: PaginationState;
-    setPagination: any;
-    pageCount?: number;
+    setPagination: (pagination: PaginationState) => void;
+    totalDataLength?: number;
+    noResults?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
@@ -41,7 +43,8 @@ export function DataTable<TData, TValue>({
     rowClassName,
     pagination,
     setPagination,
-    pageCount,
+    totalDataLength,
+    noResults,
     ...props
 }: DataTableProps<TData, TValue>) {
     const table = useReactTable({
@@ -50,10 +53,15 @@ export function DataTable<TData, TValue>({
         state: {
             pagination,
         },
-        pageCount: pageCount,
+        pageCount: totalDataLength
+            ? Math.ceil(totalDataLength / pagination.pageSize)
+            : undefined,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        onPaginationChange: setPagination,
+        onPaginationChange: (updater) =>
+            setPagination(
+                typeof updater === "function" ? updater(pagination) : updater
+            ),
         manualPagination: true,
     });
 
@@ -123,9 +131,9 @@ export function DataTable<TData, TValue>({
                         <TableRow>
                             <TableCell
                                 colSpan={columns.length}
-                                className="h-24 text-center"
+                                className="h-24 text-center font-semibold"
                             >
-                                No results.
+                                {noResults ?? "No results."}
                             </TableCell>
                         </TableRow>
                     )}
@@ -134,23 +142,65 @@ export function DataTable<TData, TValue>({
                     <TableRow className="border-b-0">
                         <TableCell
                             colSpan={columns.length}
-                            className="sticky bottom-0 bg-white font-bold"
+                            className="sticky bottom-0 bg-white"
                             style={{
                                 boxShadow: "inset 0 1px 0 hsl(var(--border))",
                             }}
                         >
-                            Page {table.getState().pagination.pageIndex + 1} of{" "}
-                            {table.getPageCount()}
-                            <button
-                                onClick={() =>
-                                    table.setPageIndex(
-                                        table.getState().pagination.pageIndex +
-                                            1
-                                    )
-                                }
-                            >
-                                +
-                            </button>
+                            <div className="flex justify-between">
+                                <span
+                                    className={cn({
+                                        invisible: data.length === 0,
+                                    })}
+                                >
+                                    Showing{" "}
+                                    <span className="font-semibold">
+                                        {table.getState().pagination.pageIndex *
+                                            table.getState().pagination
+                                                .pageSize +
+                                            1}
+                                    </span>{" "}
+                                    to{" "}
+                                    <span className="font-semibold">
+                                        {Math.min(
+                                            (table.getState().pagination
+                                                .pageIndex +
+                                                1) *
+                                                table.getState().pagination
+                                                    .pageSize,
+                                            totalDataLength ?? data.length
+                                        )}
+                                    </span>{" "}
+                                    of{" "}
+                                    <span className="font-semibold">
+                                        {totalDataLength ?? data.length}
+                                    </span>{" "}
+                                    results
+                                </span>
+                                <div>
+                                    <button
+                                        onClick={() =>
+                                            table.setPageIndex(
+                                                (prev) => prev - 1
+                                            )
+                                        }
+                                    >
+                                        -
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            table.setPageIndex(
+                                                (prev) => prev + 1
+                                            )
+                                        }
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                                <div>
+                                    <input></input>
+                                </div>
+                            </div>
                         </TableCell>
                     </TableRow>
                 </TableFooter>

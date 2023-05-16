@@ -8,7 +8,7 @@ import {
 } from "../store";
 import { DataTable } from "@/components/ui/datatable";
 import { cn } from "@/lib/utils";
-import { useRecords } from "../query";
+import { useRecords, useRecordsQuery } from "../query";
 
 const columns: ColumnDef<MetadataRecord>[] = [
     {
@@ -19,21 +19,20 @@ const columns: ColumnDef<MetadataRecord>[] = [
 
 export function TablePanel() {
     const records = useRecords();
+    const { data, status } = useRecordsQuery();
     const selectedRecordId = useCatalogueSelectedRecordId();
     const hoveredRecords = useCatalogueHoveredRecords();
     const pagination = useCataloguePagination();
     const { selectRecord, setHoveredRecords, setPagination } =
         useCatalogueActions();
 
-    const data = [...records.values()];
-
     return (
         <>
             <DataTable
                 columns={columns}
-                data={data}
+                data={[...records.values()]}
                 pagination={pagination}
-                pageCount={10}
+                totalDataLength={data?.totalRecords}
                 setPagination={setPagination}
                 onRowClick={(row) => selectRecord(row.fileIdentifier)}
                 onRowMouseOver={(row) =>
@@ -46,6 +45,13 @@ export function TablePanel() {
                             row.fileIdentifier === selectedRecordId,
                         "bg-muted": hoveredRecords.includes(row.fileIdentifier),
                     })
+                }
+                noResults={
+                    status === "loading"
+                        ? "Loading..."
+                        : status === "error"
+                        ? "Error"
+                        : undefined
                 }
             />
         </>

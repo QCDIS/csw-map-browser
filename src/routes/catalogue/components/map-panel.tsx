@@ -17,6 +17,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
     useCatalogueActions,
     useCatalogueHoveredRecords,
+    useCataloguePagination,
     useCatalogueSelectedRecordId,
 } from "../store";
 import { Layer } from "@/components/geomap/layer";
@@ -158,7 +159,8 @@ export function MapPanel() {
 
     const hoveredRecords = useCatalogueHoveredRecords();
     const selectedRecordId = useCatalogueSelectedRecordId();
-    const { setHoveredRecords, selectRecord, setMapBbox } =
+    const pagination = useCataloguePagination();
+    const { setHoveredRecords, selectRecord, setMapBbox, setPagination } =
         useCatalogueActions();
 
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -173,8 +175,11 @@ export function MapPanel() {
             const maxCoords = coordsFrom3857([bbox[2], bbox[3]]);
 
             setMapBbox([minCoords, maxCoords]);
+            setPagination({ ...pagination, pageIndex: 0 });
+            selectRecord(undefined);
+            setHoveredRecords([]);
         },
-        [setMapBbox]
+        [pagination, selectRecord, setHoveredRecords, setMapBbox, setPagination]
     );
 
     const onMapPointerMove = useCallback(
