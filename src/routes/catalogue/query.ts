@@ -1,9 +1,9 @@
 import { CswClient } from "@/lib/csw/api";
 import { useQuery } from "@tanstack/react-query";
-import { useCatalogueLayoutData } from "./layout";
 import { useCatalogueMapBbox, useCataloguePagination } from "./store";
 import { useMemo } from "react";
 import { MetadataRecord } from "@/lib/csw/parsing/md-metadata";
+import { useCatalogueLayoutData } from "./loader";
 
 export function useRecordsQuery() {
     const data = useCatalogueLayoutData();

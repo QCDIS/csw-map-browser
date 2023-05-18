@@ -1,13 +1,8 @@
-import {
-    LoaderFunctionArgs,
-    Outlet,
-    useLoaderData,
-    useRouteLoaderData,
-} from "react-router-dom";
+import { Outlet, useLoaderData } from "react-router-dom";
 import { Breadcrumb, BreadcrumbPage } from "@/components/ui/breadcrumb";
-import { CswClient } from "@/lib/csw/api";
-import { useRecordPageData } from "./record/page";
 import { useEffect } from "react";
+import { loader } from "./loader";
+import { useRecordPageData } from "./record/loader";
 
 export function CatalogueLayout() {
     const data = useLoaderData() as Awaited<ReturnType<typeof loader>>;
@@ -67,24 +62,4 @@ export function CatalogueLayout() {
             <Outlet />
         </div>
     );
-}
-CatalogueLayout.loader = loader;
-
-async function loader({ params }: LoaderFunctionArgs) {
-    const endpoint = decodeURIComponent(params.endpoint!);
-
-    const capabilities = await CswClient.getCapabilities(endpoint);
-
-    return {
-        csw: {
-            endpoint,
-            capabilities,
-        },
-    };
-}
-
-export function useCatalogueLayoutData() {
-    return useRouteLoaderData("catalogue-layout") as Awaited<
-        ReturnType<typeof loader>
-    >;
 }
