@@ -19,6 +19,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { Pagination } from "./pagination";
 
 interface DataTableProps<TData, TValue>
     extends React.HTMLAttributes<HTMLTableElement> {
@@ -147,9 +148,9 @@ export function DataTable<TData, TValue>({
                                 boxShadow: "inset 0 1px 0 hsl(var(--border))",
                             }}
                         >
-                            <div className="flex justify-between">
+                            <div className="flex justify-between items-center">
                                 <span
-                                    className={cn({
+                                    className={cn("grow-[1] w-full", {
                                         invisible: data.length === 0,
                                     })}
                                 >
@@ -177,27 +178,10 @@ export function DataTable<TData, TValue>({
                                     </span>{" "}
                                     results
                                 </span>
-                                <div>
-                                    <button
-                                        onClick={() =>
-                                            table.setPageIndex(
-                                                (prev) => prev - 1
-                                            )
-                                        }
-                                    >
-                                        -
-                                    </button>
-                                    <button
-                                        onClick={() =>
-                                            table.setPageIndex(
-                                                (prev) => prev + 1
-                                            )
-                                        }
-                                    >
-                                        +
-                                    </button>
+                                <div className="grow-[1] w-full flex justify-center">
+                                    <Pagination table={table} />
                                 </div>
-                                <div>
+                                <div className="grow-[1] w-full">
                                     <input></input>
                                 </div>
                             </div>

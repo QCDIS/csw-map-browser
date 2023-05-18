@@ -154,7 +154,7 @@ function getGeoJsonFromRecords(records: MetadataRecord[]) {
 }
 
 export function MapPanel() {
-    const { status, error } = useRecordsQuery();
+    const { status, error, isPreviousData } = useRecordsQuery();
     const records = useRecords();
 
     const hoveredRecords = useCatalogueHoveredRecords();
@@ -261,7 +261,7 @@ export function MapPanel() {
             >
                 <Layer layer={boundaryBoxLayer} />
                 <div className="absolute right-2 top-2 z-10">
-                    {status === "loading" ? (
+                    {status === "loading" || isPreviousData ? (
                         <Loader2Icon className="h-7 w-7 animate-spin text-primary" />
                     ) : status === "error" ? (
                         <Tooltip>
