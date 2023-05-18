@@ -15,13 +15,12 @@ export const router = createBrowserRouter([
     },
     {
         id: "catalogue-layout",
-        path: "catalogue/:endpoint",
         element: <CatalogueLayout />,
         errorElement: <ErrorPage />,
         loader: catalogueLayoutLoader,
         children: [
             {
-                path: "catalogue/:endpoint",
+                path: "catalogue/:endpoint/",
                 element: <CataloguePage />,
             },
             {
