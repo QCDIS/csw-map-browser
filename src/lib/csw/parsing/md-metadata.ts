@@ -1,4 +1,4 @@
-import { ElementWrapper } from "./utils";
+import { ElementWrapper, text } from "./utils";
 
 export function parseMdMetadata(el: ElementWrapper) {
     return {
@@ -36,13 +36,17 @@ export function parseIdentificationInfo(el: ElementWrapper) {
             .map(parseExtent)
             .filter((e) => e)
             .at(0),
+        descriptiveKeywords: parseDescriptiveKeywords(
+            el.getOne("descriptiveKeywords")
+        ),
+        topicCategory: el.get("topicCategory").map(text),
     };
 }
 
 export function parseCitation(el: ElementWrapper) {
     return {
         title: el.getOne("title")?.getOne("CharacterString")?.text() ?? "",
-        date: el.getOne("date")?.date(),
+        date: el.getOne("date")?.getOne("Date")?.date(),
     };
 }
 
@@ -51,21 +55,20 @@ export function parseExtent(el?: ElementWrapper) {
         return undefined;
     }
     // TODO: parse other types of extent
-    const bbox = el.getOne("EX_GeographicBoundingBox")!;
-    if (!bbox) {
-        return undefined;
-        throw new Error(
-            "EX_GeographicBoundingBox not found, extent type not supported http://www.datypic.com/sc/niem20/e-gmd_EX_Extent.html"
-        );
-    }
+    const bboxes = el
+        .get("geographicElement")
+        .map((el) => el.get("EX_GeographicBoundingBox"))
+        .flat();
 
-    return {
-        type: "BoundingBox",
-        westBoundLongitude: bbox.getOne("westBoundLongitude")!.number()!,
-        eastBoundLongitude: bbox.getOne("eastBoundLongitude")!.number()!,
-        southBoundLatitude: bbox.getOne("southBoundLatitude")!.number()!,
-        northBoundLatitude: bbox.getOne("northBoundLatitude")!.number()!,
-    };
+    return bboxes.map((bbox) => {
+        return {
+            type: "BoundingBox",
+            westBoundLongitude: bbox.getOne("westBoundLongitude")!.number()!,
+            eastBoundLongitude: bbox.getOne("eastBoundLongitude")!.number()!,
+            southBoundLatitude: bbox.getOne("southBoundLatitude")!.number()!,
+            northBoundLatitude: bbox.getOne("northBoundLatitude")!.number()!,
+        };
+    });
 }
 
 export function parseDistributionInfo(el: ElementWrapper) {
@@ -85,5 +88,14 @@ export function parseOnline(el: ElementWrapper) {
         linkage: el.getOne("linkage")?.text() ?? "",
         protocol: el.getOne("protocol")?.text() ?? "",
         name: el.getOne("name")?.text() ?? "",
+    };
+}
+
+export function parseDescriptiveKeywords(el: ElementWrapper | undefined) {
+    if (!el) {
+        return undefined;
+    }
+    return {
+        keywords: el.get("keyword").map(text),
     };
 }

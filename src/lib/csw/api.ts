@@ -1,3 +1,4 @@
+import { CswFilter, serializeFilter } from "./filters";
 import { CswParser } from "./parsing/parser";
 
 export class CswClient {
@@ -24,10 +25,7 @@ export class CswClient {
         endpoint: string,
         options: {
             signal?: AbortSignal;
-            boundingBox?: readonly [
-                readonly [number, number],
-                readonly [number, number]
-            ];
+            filter?: CswFilter;
             startPosition?: number;
             maxRecords?: number;
         } = {}
@@ -54,32 +52,16 @@ export class CswClient {
             "outputSchema",
             "http://www.isotc211.org/2005/gmd"
         );
-        url.searchParams.set("constraintLanguage", "FILTER");
-        url.searchParams.set(
-            "outputSchema",
-            "http://www.isotc211.org/2005/gmd"
-        );
-        url.searchParams.set("constraint_language_version", "1.1.0");
-        url.searchParams.set(
-            "constraint",
-            `<Filter xmlns="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">
-            ${
-                !options.boundingBox
-                    ? ""
-                    : `<Within>
-                <PropertyName>ows:BoundingBox</PropertyName>
-                <gml:Envelope>
-                    <gml:lowerCorner>${options.boundingBox[0].join(
-                        " "
-                    )}</gml:lowerCorner>
-                    <gml:upperCorner>${options.boundingBox[1].join(
-                        " "
-                    )}</gml:upperCorner>
-                </gml:Envelope>
-            </Within>`
-            }
-          </Filter>`
-        );
+        if (options.filter) {
+            url.searchParams.set("constraintLanguage", "FILTER");
+            url.searchParams.set("constraint_language_version", "1.1.0");
+            url.searchParams.set(
+                "constraint",
+                `<Filter xmlns="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">${serializeFilter(
+                    options.filter
+                )}</Filter>`
+            );
+        }
 
         const res = await fetch(url, {
             signal: options.signal,

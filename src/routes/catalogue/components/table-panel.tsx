@@ -9,11 +9,40 @@ import {
 import { DataTable } from "@/components/ui/datatable";
 import { cn } from "@/lib/utils";
 import { useRecords, useRecordsQuery } from "../query";
+import { Badge } from "@/components/ui/badge";
+import { displayNameByTopicCode } from "@/lib/csw/parsing/topic-code";
+import { TopicCodeBadge } from "@/components/iso19115/topiccode";
+
+const formatter = new Intl.DateTimeFormat();
 
 const columns: ColumnDef<MetadataRecord>[] = [
     {
+        id: "title",
         accessorFn: (row) => row.identificationInfo.citation.title,
         header: "Title",
+    },
+    {
+        id: "citation-date",
+        accessorFn: (row) => row.identificationInfo.citation.date,
+        header: "Date",
+        cell: (info) => {
+            const value = info.getValue<Date | undefined>();
+            return value && !isNaN(value.getTime())
+                ? formatter.format(value)
+                : undefined;
+        },
+    },
+    {
+        id: "topic",
+        accessorFn: (row) => row.identificationInfo.topicCategory,
+        header: "Topic",
+        cell: (info) => (
+            <div className="flex gap-1">
+                {info.getValue<string[] | undefined>()?.map((t) => (
+                    <TopicCodeBadge key={t} topicCode={t} variant="secondary" />
+                ))}
+            </div>
+        ),
     },
 ];
 

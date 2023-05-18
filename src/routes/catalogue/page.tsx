@@ -17,6 +17,10 @@ export function CataloguePage() {
         }
     }, [records, selectRecord, selectedRecordId]);
 
+    useEffect(() => {
+        console.log(records);
+    }, [records]);
+
     return (
         <div
             className="grid h-full min-h-0"

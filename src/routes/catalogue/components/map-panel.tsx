@@ -1,12 +1,7 @@
 import { GeoMap } from "@/components/geomap/geomap";
 import { cn, coordsFrom3857, coordsTo3857 } from "@/lib/utils";
-import {
-    Tooltip,
-    TooltipTrigger,
-    TooltipContent,
-} from "@radix-ui/react-tooltip";
 import { Loader2Icon, AlertTriangle } from "lucide-react";
-import { Feature, MapBrowserEvent, MapEvent } from "ol";
+import { MapBrowserEvent, MapEvent } from "ol";
 import { GeoJSON } from "ol/format";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
@@ -26,6 +21,11 @@ import { Circle as CircleStyle } from "ol/style";
 import { useRecords, useRecordsQuery } from "../query";
 import { Geometry } from "ol/geom";
 import { getArea } from "ol/sphere";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const DEFAULT_STROKE = new Stroke({
     color: "#0f172a",
@@ -99,8 +99,8 @@ function getGeoJsonFromRecords(records: MetadataRecord[]) {
                 if (!boundingBox) return null;
 
                 let geometry: any = {
-                    type: "Polygon",
-                    coordinates: [
+                    type: "MultiPolygon",
+                    coordinates: boundingBox.map((boundingBox) => [
                         (
                             [
                                 [
@@ -125,20 +125,21 @@ function getGeoJsonFromRecords(records: MetadataRecord[]) {
                                 ],
                             ] as const
                         ).map((coords) => coordsTo3857(coords)),
-                    ],
+                    ]),
                 };
 
                 if (
-                    boundingBox.eastBoundLongitude ===
-                        boundingBox.westBoundLongitude &&
-                    boundingBox.northBoundLatitude ===
-                        boundingBox.southBoundLatitude
+                    boundingBox.length === 1 &&
+                    boundingBox[0].eastBoundLongitude ===
+                        boundingBox[0].westBoundLongitude &&
+                    boundingBox[0].northBoundLatitude ===
+                        boundingBox[0].southBoundLatitude
                 ) {
                     geometry = {
                         type: "Point",
                         coordinates: coordsTo3857([
-                            boundingBox.westBoundLongitude,
-                            boundingBox.southBoundLatitude,
+                            boundingBox[0].westBoundLongitude,
+                            boundingBox[0].southBoundLatitude,
                         ]),
                     };
                 }

@@ -14,7 +14,7 @@ const PaginationButton = ({
     return (
         <button
             className={cn(
-                "relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-border hover:bg-gray-50 focus:z-20 focus:outline-offset-0",
+                "relative inline-flex items-center px-4 py-2 text-sm font-semibold ring-1 ring-inset ring-border enabled:hover:bg-muted focus:z-20 focus:outline-offset-0",
                 className
             )}
             {...props}
@@ -45,6 +45,7 @@ export const Pagination = React.forwardRef<HTMLInputElement, InputProps>(
                 <PaginationButton
                     onClick={() => table.previousPage()}
                     className="rounded-l-md"
+                    disabled={pagination.pageIndex === 0}
                 >
                     <ChevronLeftIcon className="h-5 w-5" />
                 </PaginationButton>
@@ -73,7 +74,7 @@ export const Pagination = React.forwardRef<HTMLInputElement, InputProps>(
                         </PaginationButton>
                     ))}
 
-                <PaginationButton className="bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground">
+                <PaginationButton className="bg-primary text-primary-foreground enabled:hover:bg-primary hover:text-primary-foreground">
                     {pagination.pageIndex + 1}
                 </PaginationButton>
 
@@ -106,6 +107,7 @@ export const Pagination = React.forwardRef<HTMLInputElement, InputProps>(
                 <PaginationButton
                     onClick={() => table.nextPage()}
                     className="rounded-r-md"
+                    disabled={pagination.pageIndex === pageCount - 1}
                 >
                     <ChevronRightIcon className="h-5 w-5" />
                 </PaginationButton>

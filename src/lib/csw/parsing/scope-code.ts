@@ -1,0 +1,38 @@
+export const displayNameByScopeCode = {
+    attribute: "Attribute",
+    attributeType: "Attribute type",
+    collectionHardware: "Collection hardware",
+    collectionSession: "Collection session",
+    dataset: "Dataset",
+    series: "Series",
+    nonGeographicDataset: "Non geographic dataset",
+    dimensionGroup: "Dimension group",
+    feature: "Feature",
+    featureType: "Feature type",
+    propertyType: "Property type",
+    fieldSession: "Field session",
+    software: "Software",
+    service: "Service",
+    model: "Model",
+    tile: "Tile",
+};
+
+export const descriptionByScopeCode = {
+    attribute: "Information applies to the attribute class",
+    attributeType: "Information applies to the characteristic of a feature",
+    collectionHardware: "Information applies to the collection hardware class",
+    collectionSession: "Information applies to the collection session",
+    dataset: "Information applies to the dataset",
+    series: "Information applies to the series",
+    nonGeographicDataset: "Information applies to non-geographic data",
+    dimensionGroup: "Information applies to a dimension group",
+    feature: "Information applies to a feature",
+    featureType: "Information applies to a feature type",
+    propertyType: "Information applies to a property type",
+    fieldSession: "Information applies to a field session",
+    software: "Information applies to a computer program or routine",
+    service:
+        "Information applies to a capability which a service provider entity makes available to a service user entity through a set of interfaces that define a behaviour, such as a use case",
+    model: "Information applies to a copy or imitation of an existing or hypothetical object",
+    tile: "Information applies to a tile, a spatial subset of geographic data",
+};
