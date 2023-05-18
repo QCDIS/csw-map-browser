@@ -19,7 +19,7 @@ export function CataloguePage() {
 
     return (
         <div
-            className="grid h-full"
+            className="grid h-full min-h-0"
             style={{
                 gridTemplateRows: "auto 33.333%",
                 gridTemplateColumns: "20% auto 20%",

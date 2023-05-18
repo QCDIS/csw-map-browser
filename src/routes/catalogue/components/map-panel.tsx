@@ -6,7 +6,7 @@ import {
     TooltipContent,
 } from "@radix-ui/react-tooltip";
 import { Loader2Icon, AlertTriangle } from "lucide-react";
-import { MapBrowserEvent, MapEvent } from "ol";
+import { Feature, MapBrowserEvent, MapEvent } from "ol";
 import { GeoJSON } from "ol/format";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
@@ -24,6 +24,8 @@ import { Layer } from "@/components/geomap/layer";
 import { MetadataRecord } from "@/lib/csw/parsing/md-metadata";
 import { Circle as CircleStyle } from "ol/style";
 import { useRecords, useRecordsQuery } from "../query";
+import { Geometry } from "ol/geom";
+import { getArea } from "ol/sphere";
 
 const DEFAULT_STROKE = new Stroke({
     color: "#0f172a",
@@ -183,6 +185,14 @@ export function MapPanel() {
     const onMapPointerMove = useCallback(
         (e: MapBrowserEvent<any>) => {
             const features = e.map.getFeaturesAtPixel(e.pixel!);
+            features.sort((a, b) => {
+                const aArea = getArea(a.getGeometry() as Geometry);
+                const bArea = getArea(b.getGeometry() as Geometry);
+                if (aArea > bArea) return -1;
+                if (aArea < bArea) return 1;
+                return 0;
+            });
+            features.reverse();
 
             setHoveredRecords(
                 features.map((f) => f.getProperties().id as string).slice(0, 1)

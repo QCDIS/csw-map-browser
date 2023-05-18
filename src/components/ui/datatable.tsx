@@ -20,6 +20,15 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { Pagination } from "./pagination";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "./select";
 
 interface DataTableProps<TData, TValue>
     extends React.HTMLAttributes<HTMLTableElement> {
@@ -181,8 +190,41 @@ export function DataTable<TData, TValue>({
                                 <div className="grow-[1] w-full flex justify-center">
                                     <Pagination table={table} />
                                 </div>
-                                <div className="grow-[1] w-full">
-                                    <input></input>
+                                <div className="grow-[1] w-full flex justify-end">
+                                    <Select
+                                        value={table
+                                            .getState()
+                                            .pagination.pageSize.toString()}
+                                        onValueChange={(v) =>
+                                            table.setPageSize(Number(v))
+                                        }
+                                    >
+                                        <SelectTrigger className="w-[80px]">
+                                            <SelectValue
+                                                placeholder={
+                                                    table.getState().pagination
+                                                        .pageSize
+                                                }
+                                            />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectLabel>
+                                                    Rows per page
+                                                </SelectLabel>
+                                                {[10, 20, 50, 100].map(
+                                                    (pageSize) => (
+                                                        <SelectItem
+                                                            key={pageSize}
+                                                            value={pageSize.toString()}
+                                                        >
+                                                            {pageSize}
+                                                        </SelectItem>
+                                                    )
+                                                )}
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
                         </TableCell>
