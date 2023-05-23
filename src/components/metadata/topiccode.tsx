@@ -23,7 +23,7 @@ export const TopicCodeBadge = ({
                     ] ?? topicCode}
                 </Badge>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="w-96 font-normal">
                 {descriptionByTopicCode[
                     topicCode as keyof typeof descriptionByTopicCode
                 ] ?? topicCode}

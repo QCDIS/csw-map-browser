@@ -12,15 +12,22 @@ export function parseMdMetadata(el: ElementWrapper) {
         identificationInfo: parseIdentificationInfo(
             el.getOne("identificationInfo")!
         ),
+        dataQualityInfo: parseDataQualityInfo(el.getOne("dataQualityInfo")),
+        distributionInfo: parseDistributionInfo(el.getOne("distributionInfo")),
+        language: el
+            .getOne("language")
+            ?.getOne("LanguageCode")
+            ?.attribute("codeListValue"),
+        hierarchyLevel: el
+            .getOne("hierarchyLevel")
+            ?.getOne("MD_ScopeCode")
+            ?.attribute("codeListValue"),
     };
 }
 
 export type MetadataRecord = ReturnType<typeof parseMdMetadata>;
 
 export function parseReferenceSystemInfo(el: ElementWrapper) {
-    if (!el) {
-        return undefined;
-    }
     return {
         code: el.getOne("code")?.text() ?? "",
         codeSpace: el.getOne("codeSpace")?.text() ?? "",
@@ -36,17 +43,67 @@ export function parseIdentificationInfo(el: ElementWrapper) {
             .map(parseExtent)
             .filter((e) => e)
             .at(0),
-        descriptiveKeywords: parseDescriptiveKeywords(
-            el.getOne("descriptiveKeywords")
-        ),
+        descriptiveKeywords: [
+            ...new Set(
+                el
+                    .get("descriptiveKeywords")
+                    .map(parseDescriptiveKeywords)
+                    .filter(
+                        (
+                            e
+                        ): e is NonNullable<
+                            ReturnType<typeof parseDescriptiveKeywords>
+                        > => !!e
+                    )
+                    .flat()
+            ),
+        ],
         topicCategory: el.get("topicCategory").map(text),
+        spatialResolutionType: el
+            .getOne("spatialRepresentationType")
+            ?.getOne("MD_SpatialRepresentationTypeCode")
+            ?.attribute("codeListValue"),
+        spatialResolution: el
+            .get("spatialResolution")
+            .map((el) =>
+                el?.getOne("MD_Resolution")?.getOne("Integer")?.number()
+            )
+            .filter((e): e is number => !!e)
+            .at(0),
+        status: el
+            .getOne("status")
+            ?.getOne("MD_ProgressCode")
+            ?.attribute("codeListValue"),
     };
 }
 
 export function parseCitation(el: ElementWrapper) {
+    const datesByDateType = new Map(
+        el
+            .get("date")
+            .map((el) => el.getOne("CI_Date"))
+            .filter((el) => el)
+            .map(
+                (el) =>
+                    [
+                        el
+                            ?.getOne("dateType")
+                            ?.getOne("CI_DateTypeCode")
+                            ?.attribute("codeListValue"),
+                        el?.getOne("date")?.date(),
+                    ] as const
+            )
+    );
+
     return {
         title: el.getOne("title")?.getOne("CharacterString")?.text() ?? "",
-        date: el.getOne("date")?.getOne("Date")?.date(),
+        creation: datesByDateType.get("creation"),
+        publication: datesByDateType.get("publication"),
+        identifier: el
+            .getOne("identifier")
+            ?.getOne("code")
+            ?.getOne("CharacterString")
+            ?.text(),
     };
 }
 
@@ -71,9 +128,18 @@ export function parseExtent(el?: ElementWrapper) {
     });
 }
 
-export function parseDistributionInfo(el: ElementWrapper) {
+export function parseDistributionInfo(el: ElementWrapper | undefined) {
+    if (!el) {
+        return undefined;
+    }
     return {
         transferOptions: el.get("transferOptions").map(parseTransferOptions),
+        format:
+            el
+                .getOne("MD_Format")
+                ?.getOne("name")
+                ?.getOne("CharacterString")
+                ?.text() ?? "",
     };
 }
 
@@ -95,7 +161,19 @@ export function parseDescriptiveKeywords(el: ElementWrapper | undefined) {
     if (!el) {
         return undefined;
     }
+    return el
+        .get("keyword")
+        .map((el) => el.getOne("CharacterString"))
+        .filter((el): el is ElementWrapper => !!el)
+        .map(text);
+}
+
+export function parseDataQualityInfo(el: ElementWrapper | undefined) {
+    if (!el) {
+        return undefined;
+    }
     return {
-        keywords: el.get("keyword").map(text),
+        scope: el.getOne("MD_ScopeCode")?.attribute("codeListValue"),
+        lineage: el.getOne("lineage")?.text() ?? "",
     };
 }

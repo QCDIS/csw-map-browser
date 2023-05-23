@@ -9,9 +9,8 @@ import {
 import { DataTable } from "@/components/ui/datatable";
 import { cn } from "@/lib/utils";
 import { useRecords, useRecordsQuery } from "../query";
-import { Badge } from "@/components/ui/badge";
-import { displayNameByTopicCode } from "@/lib/csw/parsing/topic-code";
-import { TopicCodeBadge } from "@/components/iso19115/topiccode";
+import { TopicCodeBadge } from "@/components/metadata/topiccode";
+import { ProgressCodeBadge } from "@/components/metadata/progresscode-badge";
 
 const formatter = new Intl.DateTimeFormat();
 
@@ -22,8 +21,20 @@ const columns: ColumnDef<MetadataRecord>[] = [
         header: "Title",
     },
     {
+        id: "status",
+        accessorFn: (row) => row.identificationInfo.status,
+        header: "Status",
+        cell: (info) => (
+            <>
+                {info.getValue<string | undefined>() && (
+                    <ProgressCodeBadge progressCode={info.getValue<string>()} />
+                )}
+            </>
+        ),
+    },
+    {
         id: "citation-date",
-        accessorFn: (row) => row.identificationInfo.citation.date,
+        accessorFn: (row) => row.dateStamp,
         header: "Date",
         cell: (info) => {
             const value = info.getValue<Date | undefined>();
@@ -35,7 +46,7 @@ const columns: ColumnDef<MetadataRecord>[] = [
     {
         id: "topic",
         accessorFn: (row) => row.identificationInfo.topicCategory,
-        header: "Topic",
+        header: "Topics",
         cell: (info) => (
             <div className="flex gap-1">
                 {info.getValue<string[] | undefined>()?.map((t) => (
@@ -48,7 +59,7 @@ const columns: ColumnDef<MetadataRecord>[] = [
 
 export function TablePanel() {
     const records = useRecords();
-    const { data, status } = useRecordsQuery();
+    const { data, status, error } = useRecordsQuery();
     const selectedRecordId = useCatalogueSelectedRecordId();
     const hoveredRecords = useCatalogueHoveredRecords();
     const pagination = useCataloguePagination();
@@ -79,7 +90,7 @@ export function TablePanel() {
                     status === "loading"
                         ? "Loading..."
                         : status === "error"
-                        ? "Error"
+                        ? error?.toString()
                         : undefined
                 }
             />

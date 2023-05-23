@@ -25,7 +25,7 @@ export function CataloguePage() {
         <div
             className="grid h-full min-h-0"
             style={{
-                gridTemplateRows: "auto 33.333%",
+                gridTemplateRows: "auto 40%",
                 gridTemplateColumns: "20% auto 20%",
             }}
         >
@@ -35,8 +35,8 @@ export function CataloguePage() {
             <div>
                 <MapPanel />
             </div>
-            <div className="p-4 row-span-2">
-                <MetadataPanel />
+            <div className="row-span-2 min-h-0">
+                <MetadataPanel key={selectedRecordId} />
             </div>
             <div className="py-4 h-full">
                 <TablePanel />

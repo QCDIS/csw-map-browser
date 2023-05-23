@@ -44,7 +44,7 @@ export const Pagination = React.forwardRef<HTMLInputElement, InputProps>(
             >
                 <PaginationButton
                     onClick={() => table.previousPage()}
-                    className="rounded-l-md"
+                    className="rounded-l-md disabled:text-muted-foreground"
                     disabled={pagination.pageIndex === 0}
                 >
                     <ChevronLeftIcon className="h-5 w-5" />
@@ -106,7 +106,7 @@ export const Pagination = React.forwardRef<HTMLInputElement, InputProps>(
 
                 <PaginationButton
                     onClick={() => table.nextPage()}
-                    className="rounded-r-md"
+                    className="rounded-r-md disabled:text-muted-foreground"
                     disabled={pagination.pageIndex === pageCount - 1}
                 >
                     <ChevronRightIcon className="h-5 w-5" />

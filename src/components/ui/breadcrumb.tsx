@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import { HomeIcon } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -13,9 +12,9 @@ export function Breadcrumb({ className, ...props }: BreadcrumbProps) {
                     <div>
                         <Link
                             to="/"
-                            className="text-gray-400 hover:text-gray-500"
+                            className="text-sm font-medium text-gray-500 hover:text-gray-700 truncate"
                         >
-                            <HomeIcon className="h-5 w-5 flex-shrink-0" />
+                            Home
                         </Link>
                     </div>
                 </li>

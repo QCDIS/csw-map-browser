@@ -21,3 +21,11 @@ export function coordsFrom3857([x, y]: readonly [number, number]) {
         (2 * Math.atan(Math.exp((lat * Math.PI) / 180)) - Math.PI / 2);
     return [lon, lat] as const;
 }
+
+export function truncate(str: string, length: number) {
+    if (str.length <= length) {
+        return str;
+    }
+
+    return str.slice(0, length - 3) + "...";
+}
