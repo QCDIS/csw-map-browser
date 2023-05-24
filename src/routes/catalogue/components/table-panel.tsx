@@ -46,7 +46,7 @@ const columns: ColumnDef<MetadataRecord>[] = [
     {
         id: "topic",
         accessorFn: (row) => row.identificationInfo.topicCategory,
-        header: "Topics",
+        header: "Categories",
         cell: (info) => (
             <div className="flex gap-1">
                 {info.getValue<string[] | undefined>()?.map((t) => (

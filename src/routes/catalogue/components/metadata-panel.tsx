@@ -4,7 +4,14 @@ import { useCatalogueSelectedRecordId } from "../store";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
 import { cn, truncate } from "@/lib/utils";
 import { useState } from "react";
-import { CalendarIcon, DatabaseIcon } from "lucide-react";
+import {
+    CalendarIcon,
+    ChevronRightIcon,
+    DatabaseIcon,
+    ExternalLinkIcon,
+    InfoIcon,
+    LinkIcon,
+} from "lucide-react";
 import {
     descriptionByScopeCode,
     displayNameByScopeCode,
@@ -13,8 +20,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { TopicCodeBadge } from "@/components/metadata/topiccode";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCatalogueLayoutData } from "../loader";
+import { displayNameByRoleCode } from "@/lib/csw/parsing/role-code";
+import {
+    descriptionByProgressCode,
+    displayNameByProgressCode,
+} from "@/lib/csw/parsing/progresscode";
 
 const formatter = new Intl.DateTimeFormat();
 const extensiveFormatter = new Intl.DateTimeFormat(undefined, {
@@ -29,7 +41,6 @@ const extensiveFormatter = new Intl.DateTimeFormat(undefined, {
 const KEYWORD_LIMIT = 4;
 
 export function MetadataPanel() {
-    const navigate = useNavigate();
     const catalogue = useCatalogueLayoutData();
 
     const [expandAbstract, setExpandAbstract] = useState(false);
@@ -46,6 +57,32 @@ export function MetadataPanel() {
         return null;
     }
 
+    const metadataUrl = new URL(catalogue.csw.endpoint);
+    metadataUrl.searchParams.set("service", "CSW");
+    metadataUrl.searchParams.set("request", "GetRecordById");
+    metadataUrl.searchParams.set("version", "2.0.2");
+    metadataUrl.searchParams.set("elementSetName", "full");
+    metadataUrl.searchParams.set(
+        "outputSchema",
+        "http://www.isotc211.org/2005/gmd"
+    );
+    metadataUrl.searchParams.set("id", selectedRecord.fileIdentifier);
+
+    const links =
+        selectedRecord.distributionInfo?.transferOptions
+            .map((o) => o.online)
+            .flat() ?? [];
+
+    const services = links.filter((l) => l.protocol.startsWith("OGC:"));
+
+    const downloads = links.filter(
+        (l) => l.protocol == "WWW:DOWNLOAD" || l.protocol == "download"
+    );
+
+    const other = links.filter(
+        (l) => !services.includes(l) && !downloads.includes(l)
+    );
+
     return (
         <div className="flex flex-col h-full">
             <div className="min-h-0 overflow-y-auto p-4 h-full">
@@ -56,7 +93,7 @@ export function MetadataPanel() {
                 <div className="flex justify-between">
                     <Tooltip>
                         <TooltipTrigger>
-                            <div className="text-sm flex items-center text-muted-foreground gap-1">
+                            <div className="text-sm flex items-center text-muted-foreground gap-1 w-full">
                                 <DatabaseIcon className="w-4 h-4" />
                                 <span>
                                     {
@@ -78,7 +115,30 @@ export function MetadataPanel() {
                     </Tooltip>
                     <Tooltip>
                         <TooltipTrigger>
-                            <div className="text-sm flex items-center text-muted-foreground gap-1">
+                            <div className="text-sm flex items-center text-muted-foreground gap-1 w-full">
+                                <InfoIcon className="w-4 h-4" />
+                                <span>
+                                    {
+                                        displayNameByProgressCode[
+                                            selectedRecord.identificationInfo
+                                                .status as keyof typeof displayNameByProgressCode
+                                        ]
+                                    }
+                                </span>
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            {
+                                descriptionByProgressCode[
+                                    selectedRecord.identificationInfo
+                                        .status as keyof typeof displayNameByProgressCode
+                                ]
+                            }
+                        </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                        <TooltipTrigger>
+                            <div className="text-sm flex items-center text-muted-foreground gap-1 w-full">
                                 <CalendarIcon className="w-4 h-4" />
                                 <span>
                                     {selectedRecord.dateStamp
@@ -139,7 +199,7 @@ export function MetadataPanel() {
                                 <Badge key={keyword} variant="secondary">
                                     {truncate(
                                         keyword,
-                                        expandKeywords ? Infinity : 20
+                                        expandKeywords ? Infinity : 40
                                     )}
                                 </Badge>
                             ))
@@ -179,7 +239,9 @@ export function MetadataPanel() {
                     <div className="flex justify-between">
                         <Label>Format</Label>
                         <span className="font-normal text-sm leading-none">
-                            {selectedRecord.distributionInfo?.format}
+                            {selectedRecord.distributionInfo?.formats.join(
+                                ", "
+                            )}
                         </span>
                     </div>
                     <div className="flex justify-between">
@@ -195,7 +257,7 @@ export function MetadataPanel() {
                     <div className="flex justify-between">
                         <Label>CRS</Label>
                         <span className="font-normal text-sm leading-none">
-                            {selectedRecord.referenceSystemInfo.code}
+                            {selectedRecord.referenceSystemInfo?.code}
                         </span>
                     </div>
                     <div className="flex justify-between">
@@ -236,27 +298,134 @@ export function MetadataPanel() {
                 <h3 className="text-lg font-semibold mt-4 mb-2">
                     Resource constraints
                 </h3>
+                <p className="text-sm text-muted-foreground">
+                    {
+                        selectedRecord.identificationInfo.resourceConstraints.find(
+                            (c) => c?.useLimitation
+                        )?.useLimitation
+                    }
+                </p>
 
                 {/* CONTACTS */}
                 <h3 className="text-lg font-semibold mt-4 mb-2">Contact</h3>
-            </div>
+                <div className="space-y-2">
+                    <div className="flex justify-between">
+                        <Label>Organisation</Label>
+                        <span className="font-normal text-sm leading-none">
+                            {selectedRecord.contact?.organisationName}
+                        </span>
+                    </div>
+                    <div className="flex justify-between">
+                        <Label>Role</Label>
+                        <span className="font-normal text-sm leading-none">
+                            {
+                                displayNameByRoleCode[
+                                    selectedRecord.contact
+                                        ?.role as keyof typeof displayNameByRoleCode
+                                ]
+                            }
+                        </span>
+                    </div>
+                    <div className="flex justify-between">
+                        <Label>Email</Label>
+                        <a
+                            className="font-normal text-sm leading-none underline"
+                            href={`mailto:${selectedRecord.contact?.contactInfo?.address?.electronicMailAddress}`}
+                            target="_blank"
+                        >
+                            {
+                                selectedRecord.contact?.contactInfo?.address
+                                    ?.electronicMailAddress
+                            }
+                        </a>
+                    </div>
+                </div>
 
-            <div className="p-4 border-t">
-                <Button
-                    className="w-full"
-                    onClick={() =>
-                        navigate(
-                            `/catalogue/${encodeURIComponent(
-                                catalogue.csw.endpoint
-                            )}/record/${encodeURIComponent(
-                                selectedRecord.fileIdentifier
-                            )}`
-                        )
-                    }
-                >
-                    View record
-                </Button>
+                {/* Resources */}
+                <h3 className="text-lg font-semibold mt-4 mb-2">Services</h3>
+                <div className="space-y-2">
+                    {services.map((o) => (
+                        <Resource online={o} key={JSON.stringify(o)} />
+                    ))}
+                </div>
+                <h3 className="text-lg font-semibold mt-4 mb-2">Downloads</h3>
+                <div className="space-y-2">
+                    {downloads.map((o) => (
+                        <Resource online={o} key={JSON.stringify(o)} />
+                    ))}
+                </div>
+                <h3 className="text-lg font-semibold mt-4 mb-2">Links</h3>
+                <div className="space-y-2">
+                    {other.map((o) => (
+                        <Resource online={o} key={JSON.stringify(o)} />
+                    ))}
+                    <Resource
+                        online={{
+                            name: "Metadata permalink",
+                            protocol: "metadata",
+                            linkage: metadataUrl.toString(),
+                        }}
+                    />
+                </div>
             </div>
         </div>
+    );
+}
+
+function Resource({
+    online,
+}: {
+    online: { name: string; protocol: string; linkage: string };
+}) {
+    const data = useCatalogueLayoutData();
+    const selectedRecordId = useCatalogueSelectedRecordId();
+    const records = useRecords();
+    const selectedRecord = records.get(selectedRecordId!)!;
+
+    const isService = online.protocol.startsWith("OGC:");
+
+    const inner = (
+        <>
+            <div className="flex flex-col p-2 gap-1">
+                <span
+                    className={cn("truncate font-semibold", {
+                        "text-muted-foreground italic": !online.name,
+                    })}
+                >
+                    {online.name || "No title"}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                    {online.protocol}
+                </span>
+            </div>
+            <div className="flex justify-center items-center p-4">
+                {isService ? (
+                    <ChevronRightIcon className="text-muted-foreground w-6 h-6" />
+                ) : (
+                    <ExternalLinkIcon className="text-muted-foreground w-6 h-6" />
+                )}
+            </div>
+        </>
+    );
+
+    return isService ? (
+        <Link
+            to={`/catalogue/${encodeURIComponent(
+                data.csw.endpoint
+            )}/record/${encodeURIComponent(
+                selectedRecord.fileIdentifier
+            )}/service/${encodeURIComponent(online.linkage)}`}
+            className="flex border rounded-md hover:bg-muted justify-between"
+        >
+            {inner}
+        </Link>
+    ) : (
+        <a
+            className="flex border rounded-md hover:bg-muted justify-between"
+            href={online.linkage}
+            target="_blank"
+        >
+            {inner}
+        </a>
     );
 }

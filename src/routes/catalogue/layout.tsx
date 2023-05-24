@@ -3,10 +3,12 @@ import { Breadcrumb, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { useEffect } from "react";
 import { loader } from "./loader";
 import { useRecordPageData } from "./record/loader";
+import { MetadataPanel } from "./components/metadata-panel";
 
 export function CatalogueLayout() {
     const data = useLoaderData() as Awaited<ReturnType<typeof loader>>;
     const recordData = useRecordPageData();
+    const selectedRecordId = recordData?.recordId;
 
     useEffect(() => {
         const recentCatalogues = JSON.parse(
@@ -59,7 +61,25 @@ export function CatalogueLayout() {
                     </Breadcrumb>
                 </div>
             </div>
-            <Outlet />
+
+            <div
+                className="grid h-full min-h-0"
+                style={{
+                    gridTemplateRows: "auto 40%",
+                    gridTemplateColumns: "20% auto 20%",
+                }}
+            >
+                <Outlet />
+                <div
+                    className="min-h-0"
+                    style={{
+                        gridRow: "1 / span 2",
+                        gridColumn: "3 / span 1",
+                    }}
+                >
+                    <MetadataPanel key={selectedRecordId} />
+                </div>
+            </div>
         </div>
     );
 }

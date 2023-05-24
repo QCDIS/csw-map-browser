@@ -22,25 +22,16 @@ export function CataloguePage() {
     }, [records]);
 
     return (
-        <div
-            className="grid h-full min-h-0"
-            style={{
-                gridTemplateRows: "auto 40%",
-                gridTemplateColumns: "20% auto 20%",
-            }}
-        >
+        <>
             <div className="p-4 row-span-2">
                 <FilterPanel />
             </div>
             <div>
                 <MapPanel />
             </div>
-            <div className="row-span-2 min-h-0">
-                <MetadataPanel key={selectedRecordId} />
-            </div>
             <div className="py-4 h-full">
                 <TablePanel />
             </div>
-        </div>
+        </>
     );
 }

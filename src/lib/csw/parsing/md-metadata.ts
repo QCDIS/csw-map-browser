@@ -22,12 +22,17 @@ export function parseMdMetadata(el: ElementWrapper) {
             .getOne("hierarchyLevel")
             ?.getOne("MD_ScopeCode")
             ?.attribute("codeListValue"),
+        contact: parseContact(el.getOne("contact")),
     };
 }
 
 export type MetadataRecord = ReturnType<typeof parseMdMetadata>;
 
-export function parseReferenceSystemInfo(el: ElementWrapper) {
+export function parseReferenceSystemInfo(el?: ElementWrapper | undefined) {
+    if (!el) {
+        return;
+    }
+
     return {
         code: el.getOne("code")?.text() ?? "",
         codeSpace: el.getOne("codeSpace")?.text() ?? "",
@@ -70,10 +75,14 @@ export function parseIdentificationInfo(el: ElementWrapper) {
             )
             .filter((e): e is number => !!e)
             .at(0),
-        status: el
-            .getOne("status")
-            ?.getOne("MD_ProgressCode")
-            ?.attribute("codeListValue"),
+        status:
+            el
+                .getOne("status")
+                ?.getOne("MD_ProgressCode")
+                ?.attribute("codeListValue") ?? "completed",
+        resourceConstraints: el
+            .get("resourceConstraints")
+            .map(parseResourceConstraints),
     };
 }
 
@@ -134,18 +143,20 @@ export function parseDistributionInfo(el: ElementWrapper | undefined) {
     }
     return {
         transferOptions: el.get("transferOptions").map(parseTransferOptions),
-        format:
-            el
-                .getOne("MD_Format")
-                ?.getOne("name")
-                ?.getOne("CharacterString")
-                ?.text() ?? "",
+        formats: el
+            .get("MD_Format")
+            .map(
+                (e) => e.getOne("name")?.getOne("CharacterString")?.text() ?? ""
+            ),
     };
 }
 
 export function parseTransferOptions(el: ElementWrapper) {
     return {
-        online: el.get("online").map(parseOnline),
+        online: el
+            .get("onLine")
+            .map(parseOnline)
+            .filter((o) => o.name || o.protocol || o.linkage),
     };
 }
 
@@ -154,6 +165,7 @@ export function parseOnline(el: ElementWrapper) {
         linkage: el.getOne("linkage")?.text() ?? "",
         protocol: el.getOne("protocol")?.text() ?? "",
         name: el.getOne("name")?.text() ?? "",
+        description: el.getOne("description")?.text() ?? "",
     };
 }
 
@@ -175,5 +187,56 @@ export function parseDataQualityInfo(el: ElementWrapper | undefined) {
     return {
         scope: el.getOne("MD_ScopeCode")?.attribute("codeListValue"),
         lineage: el.getOne("lineage")?.text() ?? "",
+    };
+}
+
+export function parseResourceConstraints(el: ElementWrapper | undefined) {
+    if (!el) {
+        return undefined;
+    }
+
+    return {
+        useLimitation: el.getOne("useLimitation")?.text(),
+    };
+}
+
+export function parseContact(el: ElementWrapper | undefined) {
+    if (!el) {
+        return undefined;
+    }
+
+    return {
+        organisationName: el
+            .getOne("organisationName")
+            ?.getOne("CharacterString")
+            ?.text(),
+        contactInfo: parseContactInfo(el.getOne("contactInfo")),
+        role: el
+            .getOne("role")
+            ?.getOne("CI_RoleCode")
+            ?.attribute("codeListValue"),
+    };
+}
+
+export function parseContactInfo(el: ElementWrapper | undefined) {
+    if (!el) {
+        return undefined;
+    }
+
+    return {
+        address: parseAddress(el.getOne("address")),
+    };
+}
+
+export function parseAddress(el: ElementWrapper | undefined) {
+    if (!el) {
+        return undefined;
+    }
+
+    return {
+        electronicMailAddress: el
+            .getOne("electronicMailAddress")
+            ?.getOne("CharacterString")
+            ?.text(),
     };
 }
