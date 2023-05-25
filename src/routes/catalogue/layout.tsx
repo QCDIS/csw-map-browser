@@ -2,13 +2,13 @@ import { Outlet, useLoaderData } from "react-router-dom";
 import { Breadcrumb, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { useEffect } from "react";
 import { loader } from "./loader";
-import { useRecordPageData } from "./record/loader";
 import { MetadataPanel } from "./components/metadata-panel";
+import { useServicePageData } from "./record/service/loader";
 
 export function CatalogueLayout() {
     const data = useLoaderData() as Awaited<ReturnType<typeof loader>>;
-    const recordData = useRecordPageData();
-    const selectedRecordId = recordData?.recordId;
+    const serviceData = useServicePageData();
+    const selectedRecordId = serviceData?.recordId;
 
     useEffect(() => {
         const recentCatalogues = JSON.parse(
@@ -44,19 +44,28 @@ export function CatalogueLayout() {
                             {data.csw.capabilities.serviceIdentification.title}
                         </BreadcrumbPage>
 
-                        {recordData && (
-                            <BreadcrumbPage
-                                href={`/catalogue/${encodeURIComponent(
-                                    data.csw.endpoint
-                                )}/record/${encodeURIComponent(
-                                    recordData.recordId
-                                )}`}
-                            >
-                                {
-                                    recordData.record.identificationInfo
-                                        .citation.title
-                                }
-                            </BreadcrumbPage>
+                        {serviceData && (
+                            <>
+                                <BreadcrumbPage>
+                                    {
+                                        serviceData.record.identificationInfo
+                                            .citation.title
+                                    }
+                                </BreadcrumbPage>
+                                <BreadcrumbPage
+                                    href={`/catalogue/${encodeURIComponent(
+                                        data.csw.endpoint
+                                    )}/record/${encodeURIComponent(
+                                        serviceData.recordId
+                                    )}/service/${encodeURIComponent(
+                                        serviceData.service.linkage
+                                    )}`}
+                                >
+                                    {serviceData.service.name ||
+                                        serviceData.service.description ||
+                                        serviceData.service.linkage}
+                                </BreadcrumbPage>
+                            </>
                         )}
                     </Breadcrumb>
                 </div>

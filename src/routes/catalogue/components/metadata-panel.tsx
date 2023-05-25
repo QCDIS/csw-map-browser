@@ -27,6 +27,7 @@ import {
     descriptionByProgressCode,
     displayNameByProgressCode,
 } from "@/lib/csw/parsing/progresscode";
+import { useServicePageData } from "../record/service/loader";
 
 const formatter = new Intl.DateTimeFormat();
 const extensiveFormatter = new Intl.DateTimeFormat(undefined, {
@@ -42,17 +43,19 @@ const KEYWORD_LIMIT = 4;
 
 export function MetadataPanel() {
     const catalogue = useCatalogueLayoutData();
+    const serviceData = useServicePageData();
 
     const [expandAbstract, setExpandAbstract] = useState(false);
     const [expandKeywords, setExpandKeywords] = useState(false);
 
     const records = useRecords();
     const selectedRecordId = useCatalogueSelectedRecordId();
-    if (!selectedRecordId) {
+    if (!serviceData && !selectedRecordId) {
         return null;
     }
 
-    const selectedRecord = records.get(selectedRecordId);
+    const selectedRecord =
+        serviceData?.record || records.get(selectedRecordId!);
     if (!selectedRecord) {
         return null;
     }
@@ -364,6 +367,7 @@ export function MetadataPanel() {
                             name: "Metadata permalink",
                             protocol: "metadata",
                             linkage: metadataUrl.toString(),
+                            description: "",
                         }}
                     />
                 </div>
@@ -375,36 +379,44 @@ export function MetadataPanel() {
 function Resource({
     online,
 }: {
-    online: { name: string; protocol: string; linkage: string };
+    online: {
+        name: string;
+        protocol: string;
+        linkage: string;
+        description: string;
+    };
 }) {
     const data = useCatalogueLayoutData();
+    const serviceData = useServicePageData();
     const selectedRecordId = useCatalogueSelectedRecordId();
     const records = useRecords();
-    const selectedRecord = records.get(selectedRecordId!)!;
+    const selectedRecord =
+        serviceData?.record || records.get(selectedRecordId!)!;
 
     const isService = online.protocol.startsWith("OGC:");
+    const isSelected =
+        serviceData?.service.linkage &&
+        serviceData?.service.linkage === online.linkage;
 
     const inner = (
         <>
-            <div className="flex flex-col p-2 gap-1">
-                <span
-                    className={cn("truncate font-semibold", {
-                        "text-muted-foreground italic": !online.name,
-                    })}
-                >
-                    {online.name || "No title"}
+            <div className="flex flex-col p-2 gap-1 min-w-0">
+                <span className={cn("truncate font-semibold", {})}>
+                    {online.name || online.description || online.linkage}
                 </span>
                 <span className="text-sm text-muted-foreground">
                     {online.protocol}
                 </span>
             </div>
-            <div className="flex justify-center items-center p-4">
-                {isService ? (
-                    <ChevronRightIcon className="text-muted-foreground w-6 h-6" />
-                ) : (
-                    <ExternalLinkIcon className="text-muted-foreground w-6 h-6" />
-                )}
-            </div>
+            {!isSelected && (
+                <div className="flex justify-center items-center p-4">
+                    {isService ? (
+                        <ChevronRightIcon className="text-muted-foreground w-6 h-6" />
+                    ) : (
+                        <ExternalLinkIcon className="text-muted-foreground w-6 h-6" />
+                    )}
+                </div>
+            )}
         </>
     );
 
@@ -415,7 +427,12 @@ function Resource({
             )}/record/${encodeURIComponent(
                 selectedRecord.fileIdentifier
             )}/service/${encodeURIComponent(online.linkage)}`}
-            className="flex border rounded-md hover:bg-muted justify-between"
+            className={cn(
+                "flex border rounded-md hover:bg-muted justify-between",
+                {
+                    "bg-muted": isSelected,
+                }
+            )}
         >
             {inner}
         </Link>

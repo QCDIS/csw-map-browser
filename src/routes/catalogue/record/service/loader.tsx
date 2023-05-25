@@ -6,14 +6,19 @@ export async function loader({ params }: LoaderFunctionArgs) {
         params.endpoint!,
         params.recordId!
     );
+    const service = record.distributionInfo?.transferOptions
+        .map((o) => o.online)
+        .flat()
+        .find((o) => o.linkage === params.serviceId!)!;
     return {
         recordId: params.recordId!,
         record,
+        service,
     };
 }
 
-export function useRecordPageData() {
-    return useRouteLoaderData("record-page") as Awaited<
-        ReturnType<typeof loader>
-    >;
+export function useServicePageData() {
+    return useRouteLoaderData("service-page") as
+        | Awaited<ReturnType<typeof loader>>
+        | undefined;
 }

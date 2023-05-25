@@ -1,8 +1,8 @@
 import { CatalogueLayout } from "./routes/catalogue/layout.tsx";
 import { loader as catalogueLayoutLoader } from "./routes/catalogue/loader.tsx";
 import { CataloguePage } from "./routes/catalogue/page.tsx";
-import { loader as recordPageLoader } from "./routes/catalogue/record/loader.tsx";
-import { RecordPage } from "./routes/catalogue/record/page.tsx";
+import { loader as serivicePageLoader } from "./routes/catalogue/record/service/loader.tsx";
+import { ServicePage } from "./routes/catalogue/record/service/page.tsx";
 import { ErrorPage } from "./routes/error.tsx";
 import { Index } from "./routes/index.tsx";
 import { createBrowserRouter } from "react-router-dom";
@@ -24,10 +24,10 @@ export const router = createBrowserRouter([
                 element: <CataloguePage />,
             },
             {
-                id: "record-page",
+                id: "service-page",
                 path: "catalogue/:endpoint/record/:recordId/service/:serviceId/",
-                element: <RecordPage />,
-                loader: recordPageLoader,
+                element: <ServicePage />,
+                loader: serivicePageLoader,
             },
         ],
     },

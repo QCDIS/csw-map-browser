@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { FilterPanel } from "./components/filter-panel";
 import { MapPanel } from "./components/map-panel";
-import { MetadataPanel } from "./components/metadata-panel";
 import { TablePanel } from "./components/table-panel";
 import { useRecords } from "./query";
 import { useCatalogueActions, useCatalogueSelectedRecordId } from "./store";
