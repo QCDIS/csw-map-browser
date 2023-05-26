@@ -13,7 +13,6 @@ export function ServicePanel() {
     const wfsCapabilities = serviceData.wfs?.capabilities;
     const wmsCapabilities = serviceData.wms?.capabilities;
 
-    const selectedFeatureType = useServiceSelectedFeatureType();
     const { setSelectedFeatureType } = useServiceActions();
 
     const [expandAbstract, setExpandAbstract] = useState(false);
@@ -96,22 +95,15 @@ export function ServicePanel() {
                         Feature types
                     </h3>
                     <div className="space-y-2 w-full">
-                        {wfsCapabilities!.featureTypeList
-                            .sort((a, b) => {
-                                if (a.name === selectedFeatureType) return -1;
-                                if (b.name === selectedFeatureType) return 1;
-
-                                return a.title.localeCompare(b.title);
-                            })
-                            .map((type, i) => (
-                                <FeatureTypeCard
-                                    key={type.name + i}
-                                    featureType={type}
-                                    onClick={() =>
-                                        setSelectedFeatureType(type.name)
-                                    }
-                                />
-                            ))}
+                        {wfsCapabilities!.featureTypeList.map((type, i) => (
+                            <FeatureTypeCard
+                                key={type.name + i}
+                                featureType={type}
+                                onClick={() =>
+                                    setSelectedFeatureType(type.name)
+                                }
+                            />
+                        ))}
                     </div>
                 </>
             )}
@@ -121,27 +113,20 @@ export function ServicePanel() {
                     {/* LAYERS */}
                     <h3 className="text-lg font-semibold mt-4 mb-2">Layers</h3>
                     <div className="space-y-2 w-full">
-                        {wmsCapabilities!.capability.layers
-                            .sort((a, b) => {
-                                if (a.name === selectedFeatureType) return -1;
-                                if (b.name === selectedFeatureType) return 1;
-
-                                return a.title.localeCompare(b.title);
-                            })
-                            .map((layer, i) => (
-                                <FeatureTypeCard
-                                    key={layer.name + i}
-                                    featureType={{
-                                        title: layer.title,
-                                        name: layer.name,
-                                        abstract: layer.abstract,
-                                        keywords: layer.keywords,
-                                    }}
-                                    onClick={() =>
-                                        setSelectedFeatureType(layer.name)
-                                    }
-                                />
-                            ))}
+                        {wmsCapabilities!.capability.layers.map((layer, i) => (
+                            <FeatureTypeCard
+                                key={layer.name + i}
+                                featureType={{
+                                    title: layer.title,
+                                    name: layer.name,
+                                    abstract: layer.abstract,
+                                    keywords: layer.keywords,
+                                }}
+                                onClick={() =>
+                                    setSelectedFeatureType(layer.name)
+                                }
+                            />
+                        ))}
                     </div>
                 </>
             )}

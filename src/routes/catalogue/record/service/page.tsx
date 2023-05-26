@@ -102,7 +102,7 @@ export function ServicePage() {
                 <Layer layer={layer} />
             </GeoMap>
             <div className="border-x h-full min-h-0">
-                <ServicePanel />
+                <ServicePanel key={pageData.service.linkage} />
             </div>
         </div>
     );

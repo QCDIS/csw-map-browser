@@ -10,7 +10,6 @@ import {
     DatabaseIcon,
     ExternalLinkIcon,
     InfoIcon,
-    LinkIcon,
 } from "lucide-react";
 import {
     descriptionByScopeCode,
@@ -19,8 +18,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { TopicCodeBadge } from "@/components/metadata/topiccode";
-import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useCatalogueLayoutData } from "../loader";
 import { displayNameByRoleCode } from "@/lib/csw/parsing/role-code";
 import {
