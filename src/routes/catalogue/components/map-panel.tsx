@@ -5,10 +5,7 @@ import { MapBrowserEvent, MapEvent } from "ol";
 import { GeoJSON } from "ol/format";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import Fill from "ol/style/Fill";
-import Stroke from "ol/style/Stroke";
-import Style from "ol/style/Style";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import {
     useCatalogueActions,
     useCatalogueHoveredRecords,
@@ -17,7 +14,6 @@ import {
 } from "../store";
 import { Layer } from "@/components/geomap/layer";
 import { MetadataRecord } from "@/lib/csw/parsing/md-metadata";
-import { Circle as CircleStyle } from "ol/style";
 import { useRecords, useRecordsQuery } from "../query";
 import { Geometry } from "ol/geom";
 import { getArea } from "ol/sphere";
@@ -26,63 +22,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-const DEFAULT_STROKE = new Stroke({
-    color: "#0f172a",
-    width: 2,
-});
-
-const DEFAULT_FILL = new Fill({
-    color: "rgba(255,255,255,0.2)",
-});
-
-const DEFAULT_STYLE = new Style({
-    fill: DEFAULT_FILL,
-    stroke: DEFAULT_STROKE,
-    image: new CircleStyle({
-        radius: 5,
-        fill: DEFAULT_FILL,
-        stroke: DEFAULT_STROKE,
-    }),
-});
-
-const HOVERED_STROKE = new Stroke({
-    color: "#0f172a",
-    width: 4,
-});
-
-const HOVERED_FILL = new Fill({
-    color: "rgba(0,0,0,0.05)",
-});
-
-const HOVERED_STYLE = new Style({
-    fill: HOVERED_FILL,
-    stroke: HOVERED_STROKE,
-    image: new CircleStyle({
-        radius: 5,
-        fill: HOVERED_FILL,
-        stroke: HOVERED_STROKE,
-    }),
-});
-
-const SELECTED_STROKE = new Stroke({
-    color: "#1d4ed8",
-    width: 4,
-});
-
-const SELECTED_FILL = new Fill({
-    color: "rgba(255,255,255,0.2)",
-});
-
-const SELECTED_STYLE = new Style({
-    fill: SELECTED_FILL,
-    stroke: SELECTED_STROKE,
-    image: new CircleStyle({
-        radius: 5,
-        fill: SELECTED_FILL,
-        stroke: SELECTED_STROKE,
-    }),
-});
+import { DEFAULT_STYLE, SELECTED_STYLE, HOVERED_STYLE } from "@/lib/constants";
 
 function getGeoJsonFromRecords(records: MetadataRecord[]) {
     return {
@@ -166,13 +106,8 @@ export function MapPanel() {
     const { setHoveredRecords, selectRecord, setMapBbox, setPagination } =
         useCatalogueActions();
 
-    const abortControllerRef = useRef<AbortController | null>(null);
     const onMapMoveEnd = useCallback(
         async (e: MapEvent) => {
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
-
             const bbox = e.map.getView().calculateExtent();
             const minCoords = coordsFrom3857([bbox[0], bbox[1]]);
             const maxCoords = coordsFrom3857([bbox[2], bbox[3]]);

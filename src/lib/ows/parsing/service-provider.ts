@@ -1,4 +1,4 @@
-import { ElementWrapper, text } from "./utils";
+import { ElementWrapper, text } from "@/lib/csw/parsing/utils";
 
 export function parseServiceProvider(el?: ElementWrapper) {
     if (!el) {

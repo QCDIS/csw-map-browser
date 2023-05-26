@@ -1,5 +1,5 @@
-import { parseServiceIdentification } from "./service-identification";
-import { parseServiceProvider } from "./service-provider";
+import { parseServiceProvider } from "@/lib/ows/parsing/service-provider";
+import { parseServiceIdentification } from "../../ows/parsing/service-identification";
 import { ElementWrapper } from "./utils";
 
 export function parseCapabilities(el: ElementWrapper) {

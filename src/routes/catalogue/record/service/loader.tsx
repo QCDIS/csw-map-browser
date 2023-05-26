@@ -1,4 +1,5 @@
 import { CswClient } from "@/lib/csw/api";
+import { WfsClient } from "@/lib/wfs/api";
 import { LoaderFunctionArgs, useRouteLoaderData } from "react-router-dom";
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -10,10 +11,16 @@ export async function loader({ params }: LoaderFunctionArgs) {
         .map((o) => o.online)
         .flat()
         .find((o) => o.linkage === params.serviceId!)!;
+
+    const capabilities = await WfsClient.getCapabilities(service.linkage);
+
     return {
         recordId: params.recordId!,
         record,
         service,
+        wfs: {
+            capabilities,
+        },
     };
 }
 
