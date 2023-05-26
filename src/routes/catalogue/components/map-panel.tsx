@@ -8,9 +8,11 @@ import VectorSource from "ol/source/Vector";
 import { useCallback, useEffect, useMemo } from "react";
 import {
     useCatalogueActions,
+    useCatalogueCenter,
     useCatalogueHoveredRecords,
     useCataloguePagination,
     useCatalogueSelectedRecordId,
+    useCatalogueZoom,
 } from "../store";
 import { Layer } from "@/components/geomap/layer";
 import { MetadataRecord } from "@/lib/csw/parsing/md-metadata";
@@ -103,8 +105,16 @@ export function MapPanel() {
     const hoveredRecords = useCatalogueHoveredRecords();
     const selectedRecordId = useCatalogueSelectedRecordId();
     const pagination = useCataloguePagination();
-    const { setHoveredRecords, selectRecord, setMapBbox, setPagination } =
-        useCatalogueActions();
+    const zoom = useCatalogueZoom();
+    const center = useCatalogueCenter();
+    const {
+        setHoveredRecords,
+        selectRecord,
+        setMapBbox,
+        setPagination,
+        setZoom,
+        setCenter,
+    } = useCatalogueActions();
 
     const onMapMoveEnd = useCallback(
         async (e: MapEvent) => {
@@ -130,8 +140,12 @@ export function MapPanel() {
             });
             features.reverse();
 
-            setHoveredRecords(
-                features.map((f) => f.getProperties().id as string).slice(0, 1)
+            setHoveredRecords((current: string[]) =>
+                current.length === 0 && features.length == 0
+                    ? current
+                    : features
+                          .map((f) => f.getProperties().id as string)
+                          .slice(0, 1)
             );
         },
         [setHoveredRecords]
@@ -204,6 +218,10 @@ export function MapPanel() {
                 onMoveEnd={onMapMoveEnd}
                 onPointerMove={onMapPointerMove}
                 onClick={() => selectRecord(hoveredRecords.at(0))}
+                zoom={zoom}
+                setZoom={setZoom}
+                center={center}
+                setCenter={setCenter}
             >
                 <Layer layer={boundaryBoxLayer} />
                 <div className="absolute right-2 top-2 z-10">

@@ -1,5 +1,6 @@
 import { CswClient } from "@/lib/csw/api";
 import { WfsClient } from "@/lib/wfs/api";
+import { WmsClient } from "@/lib/wms/api";
 import { LoaderFunctionArgs, useRouteLoaderData } from "react-router-dom";
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -12,15 +13,26 @@ export async function loader({ params }: LoaderFunctionArgs) {
         .flat()
         .find((o) => o.linkage === params.serviceId!)!;
 
-    const capabilities = await WfsClient.getCapabilities(service.linkage);
+    const isWfs = service.protocol.startsWith("OGC:WFS");
+
+    const wfsCapabilities = isWfs
+        ? await WfsClient.getCapabilities(service.linkage)
+        : undefined;
+    const wmsCapabilities = !isWfs
+        ? await WmsClient.getCapabilities(service.linkage)
+        : undefined;
 
     return {
         recordId: params.recordId!,
         record,
         service,
         wfs: {
-            capabilities,
+            capabilities: wfsCapabilities,
         },
+        wms: {
+            capabilities: wmsCapabilities,
+        },
+        type: isWfs ? "wfs" : "wms",
     };
 }
 

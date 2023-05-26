@@ -16,10 +16,6 @@ export function CataloguePage() {
         }
     }, [records, selectRecord, selectedRecordId]);
 
-    useEffect(() => {
-        console.log(records);
-    }, [records]);
-
     return (
         <>
             <div className="p-4 row-span-2">

@@ -15,7 +15,7 @@ export function parseCapabilities(el: ElementWrapper) {
     };
 }
 
-export type CswCapabilities = ReturnType<typeof parseCapabilities>;
+export type WfsCapabilities = ReturnType<typeof parseCapabilities>;
 
 function parseFeatureTypeList(el: ElementWrapper) {
     return el.get("FeatureType").map(parseFeatureType);

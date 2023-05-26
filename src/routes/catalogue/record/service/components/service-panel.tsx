@@ -4,14 +4,14 @@ import { cn, truncate } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { DatabaseIcon } from "lucide-react";
-import { FeatureType } from "@/lib/wfs/parsing/get-capabilities";
 import { useServiceActions, useServiceSelectedFeatureType } from "../store";
 
 const KEYWORD_LIMIT = 5;
 
 export function ServicePanel() {
     const serviceData = useServicePageData()!;
-    const { capabilities } = serviceData.wfs;
+    const wfsCapabilities = serviceData.wfs?.capabilities;
+    const wmsCapabilities = serviceData.wms?.capabilities;
 
     const selectedFeatureType = useServiceSelectedFeatureType();
     const { setSelectedFeatureType } = useServiceActions();
@@ -19,17 +19,33 @@ export function ServicePanel() {
     const [expandAbstract, setExpandAbstract] = useState(false);
     const [expandKeywords, setExpandKeywords] = useState(false);
 
+    const title = {
+        wfs: wfsCapabilities?.serviceIdentification.title,
+        wms: wmsCapabilities?.service.title,
+    }[serviceData.type];
+
+    const serviceType = {
+        wfs: "WFS",
+        wms: "WMS",
+    }[serviceData.type];
+
+    const abstract = {
+        wfs: wfsCapabilities?.serviceIdentification.abstract,
+        wms: wmsCapabilities?.service.abstract,
+    }[serviceData.type];
+
+    const keywords = {
+        wfs: wfsCapabilities?.serviceIdentification.keywords,
+        wms: wmsCapabilities?.service.keywords,
+    }[serviceData.type]!;
+
     return (
         <div className="p-4 overflow-y-auto h-full">
-            <h2 className="text-2xl font-bold tracking-tight">
-                {capabilities.serviceIdentification.title}
-            </h2>
+            <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
             <div className="flex justify-between">
                 <div className="text-sm flex items-center text-muted-foreground gap-1 w-full">
                     <DatabaseIcon className="w-4 h-4" />
-                    <span>
-                        {capabilities.serviceIdentification.serviceType}
-                    </span>
+                    <span>{serviceType}</span>
                 </div>
             </div>
 
@@ -43,14 +59,14 @@ export function ServicePanel() {
                 )}
                 onClick={() => setExpandAbstract((v) => !v)}
             >
-                {capabilities.serviceIdentification.abstract}
+                {abstract}
             </p>
 
             {/* KEYWORDS */}
             <div className="mt-2 space-y-1">
                 <Label>Keywords</Label>
                 <div className="flex flex-wrap gap-2">
-                    {capabilities.serviceIdentification.keywords
+                    {keywords
                         .map((keyword) => (
                             <Badge key={keyword} variant="secondary">
                                 {truncate(
@@ -61,43 +77,74 @@ export function ServicePanel() {
                         ))
                         .slice(0, expandKeywords ? undefined : KEYWORD_LIMIT)}
 
-                    {!expandKeywords &&
-                        capabilities.serviceIdentification.keywords.length >
-                            KEYWORD_LIMIT && (
-                            <Badge
-                                onClick={() => setExpandKeywords(true)}
-                                variant="secondary"
-                                className="cursor-pointer"
-                            >
-                                +
-                                {capabilities.serviceIdentification.keywords
-                                    .length - KEYWORD_LIMIT}
-                            </Badge>
-                        )}
+                    {!expandKeywords && keywords.length > KEYWORD_LIMIT && (
+                        <Badge
+                            onClick={() => setExpandKeywords(true)}
+                            variant="secondary"
+                            className="cursor-pointer"
+                        >
+                            +{keywords.length - KEYWORD_LIMIT}
+                        </Badge>
+                    )}
                 </div>
             </div>
 
-            {/* FEATURE TYPES */}
-            <h3 className="text-lg font-semibold mt-4 mb-2">Feature types</h3>
-            <div className="space-y-2 w-full">
-                {capabilities.featureTypeList
-                    .sort((a, b) => {
-                        const aTitle = a.title ?? "";
-                        const bTitle = b.title ?? "";
+            {serviceData.type === "wfs" && (
+                <>
+                    {/* FEATURE TYPES */}
+                    <h3 className="text-lg font-semibold mt-4 mb-2">
+                        Feature types
+                    </h3>
+                    <div className="space-y-2 w-full">
+                        {wfsCapabilities!.featureTypeList
+                            .sort((a, b) => {
+                                if (a.name === selectedFeatureType) return -1;
+                                if (b.name === selectedFeatureType) return 1;
 
-                        if (a.name === selectedFeatureType) return -1;
-                        if (b.name === selectedFeatureType) return 1;
+                                return a.title.localeCompare(b.title);
+                            })
+                            .map((type, i) => (
+                                <FeatureTypeCard
+                                    key={type.name + i}
+                                    featureType={type}
+                                    onClick={() =>
+                                        setSelectedFeatureType(type.name)
+                                    }
+                                />
+                            ))}
+                    </div>
+                </>
+            )}
 
-                        return aTitle.localeCompare(bTitle);
-                    })
-                    .map((type) => (
-                        <FeatureTypeCard
-                            key={type.name}
-                            featureType={type}
-                            onClick={() => setSelectedFeatureType(type.name)}
-                        />
-                    ))}
-            </div>
+            {serviceData.type === "wms" && (
+                <>
+                    {/* LAYERS */}
+                    <h3 className="text-lg font-semibold mt-4 mb-2">Layers</h3>
+                    <div className="space-y-2 w-full">
+                        {wmsCapabilities!.capability.layers
+                            .sort((a, b) => {
+                                if (a.name === selectedFeatureType) return -1;
+                                if (b.name === selectedFeatureType) return 1;
+
+                                return a.title.localeCompare(b.title);
+                            })
+                            .map((layer, i) => (
+                                <FeatureTypeCard
+                                    key={layer.name + i}
+                                    featureType={{
+                                        title: layer.title,
+                                        name: layer.name,
+                                        abstract: layer.abstract,
+                                        keywords: layer.keywords,
+                                    }}
+                                    onClick={() =>
+                                        setSelectedFeatureType(layer.name)
+                                    }
+                                />
+                            ))}
+                    </div>
+                </>
+            )}
         </div>
     );
 }
@@ -106,7 +153,12 @@ function FeatureTypeCard({
     featureType,
     ...props
 }: {
-    featureType: FeatureType;
+    featureType: {
+        title: string;
+        name: string;
+        abstract: string;
+        keywords: string[];
+    };
 } & HTMLAttributes<HTMLButtonElement>) {
     const selectedFeatureType = useServiceSelectedFeatureType();
 
@@ -138,9 +190,9 @@ function FeatureTypeCard({
             <div className="flex flex-wrap gap-2">
                 {featureType.keywords
                     .slice(0, isSelected ? Infinity : 5)
-                    .map((keyword) => (
+                    .map((keyword, i) => (
                         <Badge
-                            key={keyword}
+                            key={keyword + i}
                             variant={isSelected ? "outline" : "secondary"}
                         >
                             {keyword}

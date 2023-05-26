@@ -5,83 +5,82 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { GeoJSON } from "ol/format";
 import { useEffect, useMemo } from "react";
-import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { DEFAULT_STYLE } from "@/lib/constants";
 import { useServiceActions, useServiceSelectedFeatureType } from "./store";
 import { ServicePanel } from "./components/service-panel";
-import { CswCapabilities } from "@/lib/wfs/parsing/get-capabilities";
-
-function getOutputFormat(capabilities: CswCapabilities) {
-    console.log(capabilities);
-    const getCapabilitiesMeta =
-        capabilities.operationsMetadata?.operations.find(
-            (op) => op.name === "GetFeature"
-        );
-
-    const outputFormat = getCapabilitiesMeta?.parameters.find(
-        (param) => param.name === "outputFormat"
-    );
-
-    return outputFormat?.allowedValues.find((v) => {
-        v = v.toLowerCase();
-        return v.startsWith("application/json") || v.startsWith("geojson");
-    });
-}
+import {
+    useCatalogueActions,
+    useCatalogueCenter,
+    useCatalogueZoom,
+} from "../../store";
+import { useServiceQuery } from "./query";
+import TileWMS from "ol/source/TileWMS";
+import TileLayer from "ol/layer/Tile";
 
 export function ServicePage() {
     const pageData = useServicePageData()!;
 
+    const zoom = useCatalogueZoom();
+    const center = useCatalogueCenter();
+    const { setZoom, setCenter } = useCatalogueActions();
+
     const selectedFeatureType = useServiceSelectedFeatureType();
     const { setSelectedFeatureType } = useServiceActions();
 
-    useEffect(() => {
-        const serviceFeature =
-            pageData.wfs.capabilities.featureTypeList.find(
-                (feature) => feature.name === pageData.service.name
-            ) ?? pageData.wfs.capabilities.featureTypeList.at(0);
+    const query = useServiceQuery();
 
-        setSelectedFeatureType(serviceFeature?.name);
+    useEffect(() => {
+        if (pageData.wfs.capabilities) {
+            const serviceFeature =
+                pageData.wfs.capabilities.featureTypeList.find(
+                    (feature) => feature.name === pageData.service.name
+                ) ?? pageData.wfs.capabilities.featureTypeList.at(0);
+
+            setSelectedFeatureType(serviceFeature?.name);
+        } else if (pageData.wms.capabilities) {
+            const serviceLayer =
+                pageData.wms.capabilities.capability.layers.find(
+                    (feature) => feature.name === pageData.service.name
+                ) ?? pageData.wms.capabilities.capability.layers.at(0);
+
+            setSelectedFeatureType(serviceLayer?.name);
+        }
     }, [
         pageData.service.name,
-        pageData.wfs.capabilities.featureTypeList,
+        pageData.wfs.capabilities,
+        pageData.wms.capabilities,
         setSelectedFeatureType,
     ]);
 
     const layer = useMemo(() => {
-        if (!selectedFeatureType) {
-            return undefined;
+        if (pageData.type === "wfs") {
+            if (!query.data) return undefined;
+            const features = new GeoJSON().readFeatures(query.data);
+
+            return new VectorLayer({
+                source: new VectorSource({
+                    features,
+                }),
+                zIndex: 100,
+                style: DEFAULT_STYLE,
+            });
+        } else if (pageData.type === "wms") {
+            const url = new URL(pageData.service.linkage);
+            url.search = "";
+            return new TileLayer({
+                source: new TileWMS({
+                    url: url.toString(),
+                    params: {
+                        LAYERS: selectedFeatureType,
+                        TILED: true,
+                    },
+                }),
+            });
         }
-
-        const url = new URL(pageData.service.linkage);
-        url.search = "";
-        url.searchParams.set("service", "WFS");
-        url.searchParams.set("version", "2.0.0");
-        url.searchParams.set("request", "GetFeature");
-        url.searchParams.set("typeNames", selectedFeatureType);
-        url.searchParams.set(
-            "outputFormat",
-            getOutputFormat(pageData.wfs.capabilities) ?? "application/json"
-        );
-        url.searchParams.set("srsName", "epsg:3857");
-
-        return new VectorLayer({
-            source: new VectorSource({
-                format: new GeoJSON(),
-                url: (extents) => {
-                    url.searchParams.set(
-                        "bbox",
-                        extents.join(",") + ",EPSG:3857"
-                    );
-                    return url.toString();
-                },
-                strategy: bboxStrategy,
-            }),
-            zIndex: 100,
-            style: DEFAULT_STYLE,
-        });
     }, [
         pageData.service.linkage,
-        pageData.wfs.capabilities,
+        pageData.type,
+        query.data,
         selectedFeatureType,
     ]);
 
@@ -94,7 +93,12 @@ export function ServicePage() {
                 gridTemplateColumns: "auto 25%",
             }}
         >
-            <GeoMap>
+            <GeoMap
+                zoom={zoom}
+                setZoom={setZoom}
+                center={center}
+                setCenter={setCenter}
+            >
                 <Layer layer={layer} />
             </GeoMap>
             <div className="border-x h-full min-h-0">
