@@ -38,8 +38,8 @@ interface DataTableProps<TData, TValue>
     onRowMouseOver?: (row: TData) => void;
     onRowMouseLeave?: (row: TData) => void;
     rowClassName?: (row: TData) => string;
-    pagination: PaginationState;
-    setPagination: (pagination: PaginationState) => void;
+    pagination?: PaginationState;
+    setPagination?: (pagination: PaginationState) => void;
     totalDataLength?: number;
     noResults?: React.ReactNode;
 }
@@ -63,15 +63,21 @@ export function DataTable<TData, TValue>({
         state: {
             pagination,
         },
-        pageCount: totalDataLength
-            ? Math.ceil(totalDataLength / pagination.pageSize)
-            : undefined,
+        pageCount:
+            totalDataLength && pagination
+                ? Math.ceil(totalDataLength / pagination.pageSize)
+                : undefined,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        onPaginationChange: (updater) =>
-            setPagination(
-                typeof updater === "function" ? updater(pagination) : updater
-            ),
+        onPaginationChange:
+            setPagination && pagination
+                ? (updater) =>
+                      setPagination(
+                          typeof updater === "function"
+                              ? updater(pagination)
+                              : updater
+                      )
+                : undefined,
         manualPagination: true,
     });
 
@@ -148,88 +154,92 @@ export function DataTable<TData, TValue>({
                         </TableRow>
                     )}
                 </TableBody>
-                <TableFooter>
-                    <TableRow className="border-b-0">
-                        <TableCell
-                            colSpan={columns.length}
-                            className="sticky bottom-0 bg-white"
-                            style={{
-                                boxShadow: "inset 0 1px 0 hsl(var(--border))",
-                            }}
-                        >
-                            <div className="flex justify-between items-center">
-                                <span
-                                    className={cn("grow-[1] w-full", {
-                                        invisible: data.length === 0,
-                                    })}
-                                >
-                                    Showing{" "}
-                                    <span className="font-semibold">
-                                        {table.getState().pagination.pageIndex *
-                                            table.getState().pagination
-                                                .pageSize +
-                                            1}
-                                    </span>{" "}
-                                    to{" "}
-                                    <span className="font-semibold">
-                                        {Math.min(
-                                            (table.getState().pagination
-                                                .pageIndex +
-                                                1) *
-                                                table.getState().pagination
-                                                    .pageSize,
-                                            totalDataLength ?? data.length
-                                        )}
-                                    </span>{" "}
-                                    of{" "}
-                                    <span className="font-semibold">
-                                        {totalDataLength ?? data.length}
-                                    </span>{" "}
-                                    results
-                                </span>
-                                <div className="grow-[1] w-full flex justify-center">
-                                    <Pagination table={table} />
-                                </div>
-                                <div className="grow-[1] w-full flex justify-end">
-                                    <Select
-                                        value={table
-                                            .getState()
-                                            .pagination.pageSize.toString()}
-                                        onValueChange={(v) =>
-                                            table.setPageSize(Number(v))
-                                        }
+                {pagination && (
+                    <TableFooter>
+                        <TableRow className="border-b-0">
+                            <TableCell
+                                colSpan={columns.length}
+                                className="sticky bottom-0 bg-white"
+                                style={{
+                                    boxShadow:
+                                        "inset 0 1px 0 hsl(var(--border))",
+                                }}
+                            >
+                                <div className="flex justify-between items-center">
+                                    <span
+                                        className={cn("grow-[1] w-full", {
+                                            invisible: data.length === 0,
+                                        })}
                                     >
-                                        <SelectTrigger className="w-[80px]">
-                                            <SelectValue
-                                                placeholder={
+                                        Showing{" "}
+                                        <span className="font-semibold">
+                                            {table.getState().pagination
+                                                .pageIndex *
+                                                table.getState().pagination
+                                                    .pageSize +
+                                                1}
+                                        </span>{" "}
+                                        to{" "}
+                                        <span className="font-semibold">
+                                            {Math.min(
+                                                (table.getState().pagination
+                                                    .pageIndex +
+                                                    1) *
                                                     table.getState().pagination
-                                                        .pageSize
-                                                }
-                                            />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                <SelectLabel>
-                                                    Rows per page
-                                                </SelectLabel>
-                                                {[10, 20, 50, 100].map(
-                                                    (pageSize) => (
-                                                        <SelectItem
-                                                            key={pageSize}
-                                                            value={pageSize.toString()}
-                                                        >
-                                                            {pageSize}
-                                                        </SelectItem>
-                                                    )
-                                                )}
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
+                                                        .pageSize,
+                                                totalDataLength ?? data.length
+                                            )}
+                                        </span>{" "}
+                                        of{" "}
+                                        <span className="font-semibold">
+                                            {totalDataLength ?? data.length}
+                                        </span>{" "}
+                                        results
+                                    </span>
+                                    <div className="grow-[1] w-full flex justify-center">
+                                        <Pagination table={table} />
+                                    </div>
+                                    <div className="grow-[1] w-full flex justify-end">
+                                        <Select
+                                            value={table
+                                                .getState()
+                                                .pagination.pageSize.toString()}
+                                            onValueChange={(v) =>
+                                                table.setPageSize(Number(v))
+                                            }
+                                        >
+                                            <SelectTrigger className="w-[80px]">
+                                                <SelectValue
+                                                    placeholder={
+                                                        table.getState()
+                                                            .pagination.pageSize
+                                                    }
+                                                />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    <SelectLabel>
+                                                        Rows per page
+                                                    </SelectLabel>
+                                                    {[10, 20, 50, 100].map(
+                                                        (pageSize) => (
+                                                            <SelectItem
+                                                                key={pageSize}
+                                                                value={pageSize.toString()}
+                                                            >
+                                                                {pageSize}
+                                                            </SelectItem>
+                                                        )
+                                                    )}
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
-                            </div>
-                        </TableCell>
-                    </TableRow>
-                </TableFooter>
+                            </TableCell>
+                        </TableRow>
+                    </TableFooter>
+                )}
             </Table>
         </div>
     );

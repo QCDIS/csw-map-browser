@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
-import { useCatalogueActions } from "../store";
-import { useState } from "react";
+import { useCatalogueActions, useCatalogueSearchFilter } from "../store";
+import { useEffect, useRef, useState } from "react";
 
 export function FilterPanel() {
+    const searchFilter = useCatalogueSearchFilter();
     const { setSearchFilter } = useCatalogueActions();
 
     const [search, setSearch] = useState<string>("");
@@ -12,6 +13,11 @@ export function FilterPanel() {
     function onSubmit() {
         setSearchFilter(search);
     }
+
+    const searchFilterRef = useRef(searchFilter);
+    useEffect(() => {
+        setSearch(searchFilterRef.current);
+    }, []);
 
     return (
         <div className="flex flex-col">
@@ -27,6 +33,7 @@ export function FilterPanel() {
                     className="rounded-r-none"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                    onBlur={onSubmit}
                 />
                 <Button className="rounded-l-none" type="submit">
                     <SearchIcon className="h-5 w-5" />

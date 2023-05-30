@@ -43,5 +43,6 @@ export function useServiceQuery() {
             );
         },
         keepPreviousData: true,
+        staleTime: Infinity,
     });
 }

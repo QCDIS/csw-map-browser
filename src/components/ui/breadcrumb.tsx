@@ -7,7 +7,10 @@ type BreadcrumbProps = React.HTMLAttributes<HTMLDivElement>;
 export function Breadcrumb({ className, ...props }: BreadcrumbProps) {
     return (
         <div className={cn("flex", className)} {...props}>
-            <ol role="list" className="flex items-center space-x-4 truncate">
+            <ol
+                role="list"
+                className="flex items-center space-x-4 w-full justify-start"
+            >
                 <li>
                     <div>
                         <Link
@@ -30,7 +33,7 @@ export function BreadcrumbPage({
     ...props
 }: React.HTMLAttributes<HTMLLIElement> & { href?: string }) {
     return (
-        <li className={cn("w-full min-w-0", className)} {...props}>
+        <li className={cn("min-w-0", className)} {...props}>
             <div className="flex items-center">
                 <svg
                     className="h-5 w-5 flex-shrink-0 text-gray-400"
