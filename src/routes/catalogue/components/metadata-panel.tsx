@@ -287,7 +287,7 @@ export function MetadataPanel() {
                     </div>
                     <div className="flex flex-col space-y-1">
                         <Label>Resource identifier</Label>
-                        <span className="font-normal text-sm leading-none">
+                        <span className="font-normal text-sm leading-none truncate">
                             {
                                 selectedRecord.identificationInfo.citation
                                     .identifier

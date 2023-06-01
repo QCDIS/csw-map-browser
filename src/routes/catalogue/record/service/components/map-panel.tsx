@@ -30,6 +30,10 @@ import {
     TooltipTrigger,
     TooltipContent,
 } from "@radix-ui/react-tooltip";
+import { Interaction } from "@/components/geomap/interaction";
+import { DragBox } from "ol/interaction";
+import { DragBoxEvent } from "ol/interaction/DragBox";
+import { ListenerFunction } from "ol/events";
 
 export function MapPanel() {
     const pageData = useServicePageData()!;
@@ -105,14 +109,20 @@ export function MapPanel() {
             pressedKeys.has("Meta") ||
             pressedKeys.has("Control");
 
-        console.log(includeCurrent, pressedKeys);
-        setSelectedFeatures(
-            (current) =>
-                new Set([
-                    ...hoveredFeatures,
-                    ...(includeCurrent ? current : []),
-                ])
-        );
+        setSelectedFeatures((current) => {
+            const newSet: Set<Feature> = includeCurrent
+                ? new Set(current)
+                : new Set();
+
+            for (const f of hoveredFeatures) {
+                if (newSet.has(f)) {
+                    newSet.delete(f);
+                } else {
+                    newSet.add(f);
+                }
+            }
+            return newSet;
+        });
     }, [hoveredFeatures, pressedKeys, setSelectedFeatures]);
 
     const onMapPointerMove = useCallback(
@@ -165,6 +175,48 @@ export function MapPanel() {
         };
     }, [layer, pageData.type, selectedFeatures]);
 
+    const interaction = useMemo(() => {
+        const pressedKeys = new Set<string>();
+        window.addEventListener("keydown", (e) => {
+            pressedKeys.add(e.key);
+        });
+        window.addEventListener("keyup", (e) => {
+            pressedKeys.delete(e.key);
+        });
+
+        return new DragBox({
+            condition: () =>
+                pressedKeys.has("Shift") ||
+                pressedKeys.has("Meta") ||
+                pressedKeys.has("Control"),
+        });
+    }, []);
+
+    useEffect(() => {
+        const onBoxEnd = (_: DragBoxEvent) => {
+            if (!layer) return;
+
+            const extent = interaction.getGeometry().getExtent();
+            const selectedFeatures = (layer.getSource() as VectorSource)
+                .getFeaturesInExtent(extent)
+                .filter((feature) =>
+                    feature.getGeometry()!.intersectsExtent(extent)
+                );
+
+            setSelectedFeatures(
+                (current) => new Set([...current, ...selectedFeatures])
+            );
+        };
+        interaction.addEventListener("boxend", onBoxEnd as ListenerFunction);
+
+        return () => {
+            interaction.removeEventListener(
+                "boxend",
+                onBoxEnd as ListenerFunction
+            );
+        };
+    }, [interaction, layer, setSelectedFeatures]);
+
     return (
         <div
             className={cn("h-full w-full relative", {
@@ -180,6 +232,7 @@ export function MapPanel() {
                 onClick={onMapClick}
             >
                 <Layer layer={layer} />
+                <Interaction interaction={interaction} />
             </GeoMap>
             <div className="absolute right-2 top-2 z-10">
                 {query.status === "loading" || query.isPreviousData ? (
