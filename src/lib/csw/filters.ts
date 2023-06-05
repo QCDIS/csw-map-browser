@@ -36,20 +36,28 @@ export function serializeFilter(filter: CswFilter): string {
                 <PropertyName>${filter.property}</PropertyName>
                 <Literal>${filter.value}</Literal>
             </PropertyIsLike>`;
-        case "And":
-            if (filter.filters.length === 0) return "";
-            if (filter.filters.length === 1)
-                return serializeFilter(filter.filters[0]);
+        case "And": {
+            const serializedFilters = filter.filters
+                .map(serializeFilter)
+                .filter(Boolean);
+            if (serializedFilters.length === 0) return "";
+            if (serializedFilters.length === 1) return serializedFilters[0];
+
             return `<And>
-                ${filter.filters.map(serializeFilter).join("\n")}
+                ${serializedFilters.join("\n")}
             </And>`;
-        case "Or":
-            if (filter.filters.length === 0) return "";
-            if (filter.filters.length === 1)
-                return serializeFilter(filter.filters[0]);
+        }
+        case "Or": {
+            const serializedFilters = filter.filters
+                .map(serializeFilter)
+                .filter(Boolean);
+            if (serializedFilters.length === 0) return "";
+            if (serializedFilters.length === 1) return serializedFilters[0];
+
             return `<Or>
-                ${filter.filters.map(serializeFilter).join("\n")}
+                ${serializedFilters.join("\n")}
             </Or>`;
+        }
         case "Within":
             return `<Within>
                 <PropertyName>${filter.property}</PropertyName>

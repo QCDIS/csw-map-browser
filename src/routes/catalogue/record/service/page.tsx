@@ -40,7 +40,7 @@ export function ServicePage() {
                 gridRow: "1 / 3",
                 gridColumn: "1 / 3",
                 gridTemplateColumns: "auto 25%",
-                gridTemplateRows: "auto 30%",
+                gridTemplateRows: "auto 35%",
             }}
         >
             <div>

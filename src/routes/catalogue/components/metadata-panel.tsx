@@ -8,6 +8,7 @@ import {
     CalendarIcon,
     ChevronRightIcon,
     DatabaseIcon,
+    DownloadIcon,
     ExternalLinkIcon,
     InfoIcon,
 } from "lucide-react";
@@ -26,6 +27,8 @@ import {
     displayNameByProgressCode,
 } from "@/lib/csw/parsing/progresscode";
 import { useServicePageData } from "../record/service/loader";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { ExportDialog } from "../record/service/components/export-dialog";
 
 const formatter = new Intl.DateTimeFormat();
 const extensiveFormatter = new Intl.DateTimeFormat(undefined, {
@@ -76,9 +79,7 @@ export function MetadataPanel() {
 
     const services = links.filter((l) => l.protocol.startsWith("OGC:"));
 
-    const downloads = links.filter(
-        (l) => l.protocol == "WWW:DOWNLOAD" || l.protocol == "download"
-    );
+    const downloads = links.filter((l) => isProtocolDownload(l.protocol));
 
     const other = links.filter(
         (l) => !services.includes(l) && !downloads.includes(l)
@@ -349,7 +350,7 @@ export function MetadataPanel() {
                         <Resource online={o} key={JSON.stringify(o)} />
                     ))}
                 </div>
-                <h3 className="text-lg font-semibold mt-4 mb-2">Downloads</h3>
+                <h3 className="text-lg font-semibold mt-4 mb-2">Files</h3>
                 <div className="space-y-2">
                     {downloads.map((o) => (
                         <Resource online={o} key={JSON.stringify(o)} />
@@ -392,6 +393,7 @@ function Resource({
         serviceData?.record || records.get(selectedRecordId!)!;
 
     const isService = online.protocol.startsWith("OGC:");
+    const isDownload = isProtocolDownload(online.protocol);
     const isSelected =
         serviceData?.service.linkage &&
         serviceData?.service.linkage === online.linkage;
@@ -410,6 +412,8 @@ function Resource({
                 <div className="flex justify-center items-center p-4">
                     {isService ? (
                         <ChevronRightIcon className="text-muted-foreground w-6 h-6" />
+                    ) : isDownload ? (
+                        <DownloadIcon className="text-muted-foreground w-6 h-6" />
                     ) : (
                         <ExternalLinkIcon className="text-muted-foreground w-6 h-6" />
                     )}
@@ -434,6 +438,20 @@ function Resource({
         >
             {inner}
         </Link>
+    ) : isDownload ? (
+        <Dialog>
+            <DialogTrigger
+                className={cn(
+                    "flex border rounded-md hover:bg-muted justify-between w-full text-left items-center",
+                    {
+                        "bg-muted": isSelected,
+                    }
+                )}
+            >
+                {inner}
+            </DialogTrigger>
+            <ExportDialog type="online" online={online} />
+        </Dialog>
     ) : (
         <a
             className="flex border rounded-md hover:bg-muted justify-between"
@@ -442,5 +460,15 @@ function Resource({
         >
             {inner}
         </a>
+    );
+}
+
+function isProtocolDownload(protocol: string) {
+    protocol = protocol.toLowerCase();
+    return (
+        protocol.startsWith("www:download") ||
+        ["download", "file", "json", "geojson", "csv", "shape-zip"].includes(
+            protocol
+        )
     );
 }

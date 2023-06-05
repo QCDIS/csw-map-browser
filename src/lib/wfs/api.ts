@@ -18,7 +18,7 @@ export class WfsClient {
         return WfsParser.parseGetCapabilities(text);
     }
 
-    static async getFeature(
+    static createGetFeatureUrl(
         wfsUrl: string,
         typeNames: string,
         outputformat: string
@@ -32,7 +32,20 @@ export class WfsClient {
         url.searchParams.set("outputformat", outputformat);
         url.searchParams.set("srsName", "EPSG:3857");
 
-        const response = await fetch(url.toString());
+        return url.toString();
+    }
+
+    static async getFeature(
+        wfsUrl: string,
+        typeNames: string,
+        outputformat: string
+    ) {
+        const url = WfsClient.createGetFeatureUrl(
+            wfsUrl,
+            typeNames,
+            outputformat
+        );
+        const response = await fetch(url);
 
         if (!response.ok)
             throw new Error(

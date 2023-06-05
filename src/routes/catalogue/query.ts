@@ -4,6 +4,8 @@ import {
     useCatalogueMapBbox,
     useCataloguePagination,
     useCatalogueSearchFilter,
+    useCatalogueTopicCodesFilter,
+    useCatalogueTypesFilter,
 } from "./store";
 import { useMemo } from "react";
 import { MetadataRecord } from "@/lib/csw/parsing/md-metadata";
@@ -15,6 +17,8 @@ export function useRecordsQuery() {
     const mapBbox = useCatalogueMapBbox();
     const pagination = useCataloguePagination();
     const search = useCatalogueSearchFilter();
+    const topicCodes = useCatalogueTopicCodesFilter();
+    const types = useCatalogueTypesFilter();
 
     return useQuery({
         queryKey: [
@@ -23,14 +27,32 @@ export function useRecordsQuery() {
             mapBbox,
             pagination.pageSize,
             pagination.pageIndex,
-            ,
             search,
+            [...topicCodes],
+            [...types],
         ],
         enabled: !!mapBbox,
         queryFn: async ({ signal }) => {
             const filter: CswFilter = {
                 type: "And",
-                filters: [],
+                filters: [
+                    {
+                        type: "Or",
+                        filters: [...topicCodes].map((topicCode) => ({
+                            type: "PropertyIsEqualTo",
+                            property: "csw:TopicCategory",
+                            value: topicCode,
+                        })),
+                    },
+                    {
+                        type: "Or",
+                        filters: [...types].map((type) => ({
+                            type: "PropertyIsEqualTo",
+                            property: "csw:Type",
+                            value: type,
+                        })),
+                    },
+                ],
             };
 
             if (mapBbox) {

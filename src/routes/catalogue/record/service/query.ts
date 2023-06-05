@@ -4,7 +4,7 @@ import { useServiceSelectedFeatureType } from "./store";
 import { WfsClient } from "@/lib/wfs/api";
 import { WfsCapabilities } from "@/lib/wfs/parsing/get-capabilities";
 
-function getOutputFormat(capabilities: WfsCapabilities) {
+export function getOutputFormat(capabilities: WfsCapabilities) {
     const getCapabilitiesMeta =
         capabilities.operationsMetadata?.operations.find(
             (op) => op.name === "GetFeature"
@@ -36,13 +36,18 @@ export function useServiceQuery() {
             if (!selectedFeatureType) return null;
             if (!data.wfs.capabilities) return null;
 
+            const outputFormat = getOutputFormat(data.wfs.capabilities);
+            if (!outputFormat)
+                throw new Error("This service does not support geojson");
+
             return await WfsClient.getFeature(
                 data.service.linkage,
                 selectedFeatureType,
-                getOutputFormat(data.wfs.capabilities) ?? "application/json"
+                outputFormat
             );
         },
         keepPreviousData: true,
         staleTime: Infinity,
+        retry: false,
     });
 }

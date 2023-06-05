@@ -29,7 +29,7 @@ import {
     Tooltip,
     TooltipTrigger,
     TooltipContent,
-} from "@radix-ui/react-tooltip";
+} from "@/components/ui/tooltip";
 import { Interaction } from "@/components/geomap/interaction";
 import { DragBox } from "ol/interaction";
 import { DragBoxEvent } from "ol/interaction/DragBox";
@@ -94,12 +94,18 @@ export function MapPanel() {
             });
         };
 
+        const onBlur = () => {
+            setPressedKeys(new Set());
+        };
+
         window.addEventListener("keydown", onKeyDown);
         window.addEventListener("keyup", onKeyUp);
+        window.addEventListener("blur", onBlur);
 
         return () => {
             window.removeEventListener("keydown", onKeyDown);
             window.removeEventListener("keyup", onKeyUp);
+            window.removeEventListener("blur", onBlur);
         };
     }, []);
 
@@ -237,7 +243,7 @@ export function MapPanel() {
             <div className="absolute right-2 top-2 z-10">
                 {query.status === "loading" || query.isPreviousData ? (
                     <Loader2Icon className="h-7 w-7 animate-spin text-primary" />
-                ) : status === "error" ? (
+                ) : query.status === "error" ? (
                     <Tooltip>
                         <TooltipTrigger>
                             <AlertTriangle className="h-7 w-7 text-destructive" />

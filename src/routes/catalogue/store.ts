@@ -11,6 +11,8 @@ type CatalogueStore = {
 
     filters: {
         search: string;
+        topicCodes: Set<string>;
+        types: Set<string>;
     };
 
     actions: {
@@ -27,6 +29,8 @@ type CatalogueStore = {
         setZoom: (zoom: number) => void;
         setCenter: (center: [number, number]) => void;
         setSearchFilter: (search: string) => void;
+        setTopicCodesFilter: (topicCodes: Set<string>) => void;
+        setTypesFilter: (type: Set<string>) => void;
     };
 };
 
@@ -39,6 +43,8 @@ const useCatalogueStore = create<CatalogueStore>((set, get) => ({
     center: [0, 0],
     filters: {
         search: "",
+        topicCodes: new Set(),
+        types: new Set(),
     },
     actions: {
         setHoveredRecords: (hoveredRecords) =>
@@ -53,7 +59,12 @@ const useCatalogueStore = create<CatalogueStore>((set, get) => ({
         setMapBbox: (mapBbox) => set({ mapBbox }),
         setZoom: (zoom) => set({ zoom }),
         setCenter: (center) => set({ center }),
-        setSearchFilter: (search) => set({ filters: { search } }),
+        setSearchFilter: (search) =>
+            set({ filters: { ...get().filters, search } }),
+        setTopicCodesFilter: (topicCodes) =>
+            set({ filters: { ...get().filters, topicCodes } }),
+        setTypesFilter: (types) =>
+            set({ filters: { ...get().filters, types } }),
     },
 }));
 
@@ -65,8 +76,14 @@ export const useCataloguePagination = () =>
     useCatalogueStore((state) => state.pagination);
 export const useCatalogueMapBbox = () =>
     useCatalogueStore((state) => state.mapBbox);
+
 export const useCatalogueSearchFilter = () =>
     useCatalogueStore((state) => state.filters.search);
+export const useCatalogueTopicCodesFilter = () =>
+    useCatalogueStore((state) => state.filters.topicCodes);
+export const useCatalogueTypesFilter = () =>
+    useCatalogueStore((state) => state.filters.types);
+
 export const useCatalogueZoom = () => useCatalogueStore((state) => state.zoom);
 export const useCatalogueCenter = () =>
     useCatalogueStore((state) => state.center);
