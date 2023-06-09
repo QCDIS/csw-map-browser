@@ -30,8 +30,12 @@ export function Breadcrumb({ className, ...props }: BreadcrumbProps) {
 export function BreadcrumbPage({
     className,
     href,
+    disabled,
     ...props
-}: React.HTMLAttributes<HTMLLIElement> & { href?: string }) {
+}: React.HTMLAttributes<HTMLLIElement> & {
+    href?: string;
+    disabled?: boolean;
+}) {
     return (
         <li className={cn("min-w-0", className)} {...props}>
             <div className="flex items-center">
@@ -45,7 +49,12 @@ export function BreadcrumbPage({
                 </svg>
                 <Link
                     to={href ?? "#"}
-                    className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700 truncate"
+                    className={cn(
+                        "ml-4 text-sm font-medium text-gray-500 hover:text-gray-700 truncate",
+                        {
+                            "pointer-events-none": disabled,
+                        }
+                    )}
                 >
                     {props.children}
                 </Link>

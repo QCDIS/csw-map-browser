@@ -32,7 +32,7 @@ export function CatalogueLayout() {
     }, [data.csw.capabilities.serviceIdentification.title, data.csw.endpoint]);
 
     return (
-        <div className="h-screen flex flex-col">
+        <div className="h-screen flex flex-col overflow-hidden">
             <div className="w-full border-b shadow-sm">
                 <div className="mr-[20%] ml-[20%] p-3">
                     <Breadcrumb>
@@ -46,7 +46,7 @@ export function CatalogueLayout() {
 
                         {serviceData && (
                             <>
-                                <BreadcrumbPage>
+                                <BreadcrumbPage disabled>
                                     {
                                         serviceData.record.identificationInfo
                                             .citation.title

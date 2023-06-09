@@ -18,7 +18,7 @@ export function CataloguePage() {
 
     return (
         <>
-            <div className="p-4 row-span-2">
+            <div className="p-4 row-span-2 overflow-auto">
                 <FilterPanel />
             </div>
             <div>

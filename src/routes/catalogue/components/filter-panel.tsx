@@ -76,7 +76,7 @@ export function FilterPanel() {
                                     setTopicCodesFilter(newTopicCodes);
                                 }}
                             />
-                            <label className="text-sm font-medium leading-none">
+                            <label className="text-sm font-medium leading-none truncate">
                                 {displayNameByTopicCode[topicCode]}
                             </label>
                         </div>
@@ -108,7 +108,7 @@ export function FilterPanel() {
                                     setTypesFilter(newTypes);
                                 }}
                             />
-                            <label className="text-sm font-medium leading-none">
+                            <label className="text-sm font-medium leading-none truncate">
                                 {displayNameByScopeCode[scopeCode]}
                             </label>
                         </div>
