@@ -56,4 +56,5 @@ export const SELECTED_STYLE = new Style({
         fill: SELECTED_FILL,
         stroke: SELECTED_STROKE,
     }),
+    zIndex: 1000,
 });

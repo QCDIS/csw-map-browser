@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { useRecords, useRecordsQuery } from "../query";
 import { TopicCodeBadge } from "@/components/metadata/topiccode";
 import { ProgressCodeBadge } from "@/components/metadata/progresscode-badge";
+import { Badge } from "@/components/ui/badge";
 
 const formatter = new Intl.DateTimeFormat();
 
@@ -55,6 +56,28 @@ const columns: ColumnDef<MetadataRecord>[] = [
             </div>
         ),
     },
+    {
+        id: "services",
+        accessorFn: (row) =>
+            [
+                ...new Set(
+                    row.distributionInfo?.transferOptions
+                        .map((t) => t.online)
+                        .flat()
+                        .map((o) => o.protocol)
+                        .filter((p) => p.toLowerCase().startsWith("ogc:"))
+                        .map((p) => p.slice(4))
+                ),
+            ] ?? [],
+        header: "Services",
+        cell: (info) => (
+            <div className="flex gap-1">
+                {info.getValue<string[] | undefined>()?.map((t) => (
+                    <Badge key={t}>{t}</Badge>
+                ))}
+            </div>
+        ),
+    },
 ];
 
 export function TablePanel() {
@@ -75,10 +98,16 @@ export function TablePanel() {
                 totalDataLength={data?.totalRecords}
                 setPagination={setPagination}
                 onRowClick={(row) => selectRecord(row.fileIdentifier)}
-                onRowMouseOver={(row) =>
-                    setHoveredRecords([row.fileIdentifier])
+                onRowMouseOver={(row) => {
+                    if (records.size < 50) {
+                        setHoveredRecords([row.fileIdentifier]);
+                    }
+                }}
+                onRowMouseLeave={() =>
+                    setHoveredRecords((current) =>
+                        current.length === 0 ? current : []
+                    )
                 }
-                onRowMouseLeave={() => setHoveredRecords([])}
                 rowClassName={(row) =>
                     cn({
                         "font-bold !bg-muted":

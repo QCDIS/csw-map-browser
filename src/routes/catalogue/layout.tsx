@@ -72,7 +72,7 @@ export function CatalogueLayout() {
             </div>
 
             <div
-                className="grid h-full min-h-0"
+                className="grid h-full min-h-0 max-w-[100vw] w-full"
                 style={{
                     gridTemplateRows: "auto 40%",
                     gridTemplateColumns: "20% auto 20%",

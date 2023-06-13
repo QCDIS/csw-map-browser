@@ -161,9 +161,20 @@ export function parseTransferOptions(el: ElementWrapper) {
 }
 
 export function parseOnline(el: ElementWrapper) {
+    const protocol = el.getOne("protocol")?.text() ?? "";
+    let linkage = el.getOne("linkage")?.text() ?? "";
+
+    // Some services have a protocol of "OGC:WFS" with a wms linkage
+    if (
+        protocol.toLowerCase() === "ogc:wfs" &&
+        linkage.toLowerCase().endsWith("wms")
+    ) {
+        linkage = linkage.substring(0, linkage.length - 3) + "wfs";
+    }
+
     return {
-        linkage: el.getOne("linkage")?.text() ?? "",
-        protocol: el.getOne("protocol")?.text() ?? "",
+        linkage,
+        protocol,
         name: el.getOne("name")?.text() ?? "",
         description: el.getOne("description")?.text() ?? "",
     };

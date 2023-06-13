@@ -70,7 +70,7 @@ export function MetadataPanel() {
         "outputSchema",
         "http://www.isotc211.org/2005/gmd"
     );
-    metadataUrl.searchParams.set("id", selectedRecord.fileIdentifier);
+    metadataUrl.searchParams.set("id", selectedRecord?.fileIdentifier);
 
     const links =
         selectedRecord.distributionInfo?.transferOptions
@@ -397,6 +397,10 @@ function Resource({
     const isSelected =
         serviceData?.service.linkage &&
         serviceData?.service.linkage === online.linkage;
+
+    if (!selectedRecord) {
+        return null;
+    }
 
     const inner = (
         <>
