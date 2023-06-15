@@ -395,8 +395,9 @@ function Resource({
     const isService = online.protocol.startsWith("OGC:");
     const isDownload = isProtocolDownload(online.protocol);
     const isSelected =
-        serviceData?.service.linkage &&
-        serviceData?.service.linkage === online.linkage;
+        serviceData?.service.linkage === online.linkage &&
+        serviceData?.service.name === online.name &&
+        serviceData?.service.protocol === online.protocol;
 
     if (!selectedRecord) {
         return null;
@@ -432,7 +433,9 @@ function Resource({
                 data.csw.endpoint
             )}/record/${encodeURIComponent(
                 selectedRecord.fileIdentifier
-            )}/service/${encodeURIComponent(online.linkage)}`}
+            )}/service/${encodeURIComponent(online.name)}/${encodeURIComponent(
+                online.protocol
+            )}/${encodeURIComponent(online.linkage)}`}
             className={cn(
                 "flex border rounded-md hover:bg-muted justify-between",
                 {

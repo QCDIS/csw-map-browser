@@ -58,6 +58,10 @@ export function CatalogueLayout() {
                                     )}/record/${encodeURIComponent(
                                         serviceData.recordId
                                     )}/service/${encodeURIComponent(
+                                        serviceData.service.name
+                                    )}/${
+                                        serviceData.service.protocol
+                                    }/${encodeURIComponent(
                                         serviceData.service.linkage
                                     )}`}
                                 >

@@ -100,7 +100,8 @@ export function ExportDialog(props: Props) {
     switch (props.type) {
         case "features":
             {
-                const code = `import geopandas as gpd
+                const code = `!pip install geopandas
+import geopandas as gpd
 filename = "data.geojson"
 df = gpd.read_file(filename)`;
 
@@ -116,7 +117,8 @@ df = gpd.read_file(filename)`;
             break;
         case "feature-type":
             {
-                const code = `import geopandas as gpd
+                const code = `!pip install geopandas
+import geopandas as gpd
 url = "${props.url}"
 df = gpd.read_file(url)`;
 
@@ -137,7 +139,8 @@ df = gpd.read_file(url)`;
                     url.pathname.split("/").at(-1)?.split(".").at(1);
                 const fileName = `data.${fileExt}`;
 
-                const code = `import requests
+                const code = `!pip install requests
+import requests
 import os
 
 url = "${props.online.linkage}"

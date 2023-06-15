@@ -25,7 +25,7 @@ export const router = createBrowserRouter([
             },
             {
                 id: "service-page",
-                path: "catalogue/:endpoint/record/:recordId/service/:serviceId/",
+                path: "catalogue/:endpoint/record/:recordId/service/:serviceName/:serviceProtocol/:serviceLinkage/",
                 element: <ServicePage />,
                 loader: serivicePageLoader,
             },

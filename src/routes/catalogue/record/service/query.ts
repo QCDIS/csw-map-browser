@@ -23,7 +23,6 @@ export function getOutputFormat(capabilities: WfsCapabilities) {
 export function useServiceQuery() {
     const data = useServicePageData()!;
     const selectedFeatureType = useServiceSelectedFeatureType();
-
     return useQuery({
         queryKey: [
             "service",

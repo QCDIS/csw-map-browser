@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
 import {
     useCatalogueActions,
+    useCataloguePagination,
     useCatalogueSearchFilter,
     useCatalogueTopicCodesFilter,
     useCatalogueTypesFilter,
@@ -17,13 +18,22 @@ export function FilterPanel() {
     const searchFilter = useCatalogueSearchFilter();
     const topicCodes = useCatalogueTopicCodesFilter();
     const types = useCatalogueTypesFilter();
-    const { setSearchFilter, setTopicCodesFilter, setTypesFilter } =
-        useCatalogueActions();
+    const pagination = useCataloguePagination();
+    const {
+        setSearchFilter,
+        setTopicCodesFilter,
+        setTypesFilter,
+        setPagination,
+    } = useCatalogueActions();
 
     const [search, setSearch] = useState<string>("");
 
     function onSubmit() {
         setSearchFilter(search);
+        setPagination({
+            ...pagination,
+            pageIndex: 0,
+        });
     }
 
     const searchFilterRef = useRef(searchFilter);
@@ -74,6 +84,10 @@ export function FilterPanel() {
                                         newTopicCodes.delete(topicCode);
                                     }
                                     setTopicCodesFilter(newTopicCodes);
+                                    setPagination({
+                                        ...pagination,
+                                        pageIndex: 0,
+                                    });
                                 }}
                             />
                             <label className="text-sm font-medium leading-none truncate">
@@ -106,6 +120,10 @@ export function FilterPanel() {
                                         newTypes.delete(scopeCode);
                                     }
                                     setTypesFilter(newTypes);
+                                    setPagination({
+                                        ...pagination,
+                                        pageIndex: 0,
+                                    });
                                 }}
                             />
                             <label className="text-sm font-medium leading-none truncate">

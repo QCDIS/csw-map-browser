@@ -8,10 +8,17 @@ export async function loader({ params }: LoaderFunctionArgs) {
         params.endpoint!,
         params.recordId!
     );
+    console.log(params, record.distributionInfo?.transferOptions);
     const service = record.distributionInfo?.transferOptions
         .map((o) => o.online)
         .flat()
-        .find((o) => o.linkage === params.serviceId!)!;
+        .find(
+            (o) =>
+                o.linkage === params.serviceLinkage! &&
+                o.name === params.serviceName! &&
+                o.protocol === params.serviceProtocol!
+        );
+    if (!service) throw new Error("Service not found");
 
     const isWfs = service.protocol.startsWith("OGC:WFS");
 

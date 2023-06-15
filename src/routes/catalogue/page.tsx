@@ -21,10 +21,10 @@ export function CataloguePage() {
             <div className="p-4 row-span-2 overflow-auto">
                 <FilterPanel />
             </div>
-            <div>
+            <div className="overflow-hidden">
                 <MapPanel />
             </div>
-            <div className="py-4 h-full">
+            <div className="py-4 h-full w-full overflow-hidden">
                 <TablePanel />
             </div>
         </>

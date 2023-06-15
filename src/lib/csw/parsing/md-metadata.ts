@@ -156,7 +156,18 @@ export function parseTransferOptions(el: ElementWrapper) {
         online: el
             .get("onLine")
             .map(parseOnline)
-            .filter((o) => o.name || o.protocol || o.linkage),
+            .filter((o) => o.name || o.protocol || o.linkage)
+            .filter(
+                (o) =>
+                    o.linkage &&
+                    !o.linkage.startsWith(
+                        "https://maps-intern.zaanstad.gem.local"
+                    ) &&
+                    !(
+                        o.linkage.startsWith("https://tiles.zaanstad.nl") &&
+                        o.protocol === "OGC:WFS"
+                    )
+            ),
     };
 }
 
@@ -175,7 +186,7 @@ export function parseOnline(el: ElementWrapper) {
     return {
         linkage,
         protocol,
-        name: el.getOne("name")?.text() ?? "",
+        name: el.getOne("name")?.getOne("CharacterString")?.text() ?? "",
         description: el.getOne("description")?.text() ?? "",
     };
 }
